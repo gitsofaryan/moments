@@ -5,11 +5,15 @@ import { HomeScreen } from '@/components/HomeScreen';
 import { WriteScreen } from '@/components/WriteScreen';
 import { CalendarScreen } from '@/components/CalendarScreen';
 import { useJournal } from '@/hooks/useJournal';
+import { usePuterAuth } from '@/hooks/usePuterAuth';
 import { getTodayString, parseDate, formatDate, addDays } from '@/lib/dateUtils';
+import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 const Index = () => {
   const [currentRoute, setCurrentRoute] = useState<Route>('home');
   const [selectedDate, setSelectedDate] = useState(getTodayString());
+  const { isAuthenticated, isLoading: authLoading, signIn } = usePuterAuth();
 
   const {
     entries,
@@ -73,6 +77,51 @@ const Index = () => {
     setSelectedDate(date);
     setCurrentRoute('write');
   }, []);
+
+  // Show auth screen if not authenticated
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center animate-pulse">
+          <div className="w-12 h-12 rounded-full bg-primary/20 mx-auto mb-4" />
+          <p className="text-muted-foreground">Initializing...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <motion.div
+          className="text-center max-w-md px-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <motion.div
+            className="w-20 h-20 rounded-full bg-primary/20 mx-auto mb-6 flex items-center justify-center"
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <span className="text-4xl">📖</span>
+          </motion.div>
+          <h1 className="font-display text-4xl font-semibold text-foreground mb-4">
+            Journey
+          </h1>
+          <p className="text-muted-foreground mb-8 leading-relaxed">
+            Capture your 365-day journey. Sign in with Puter to begin.
+          </p>
+          <Button
+            size="lg"
+            onClick={signIn}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-8"
+          >
+            Sign in to Start
+          </Button>
+        </motion.div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

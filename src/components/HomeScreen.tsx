@@ -70,7 +70,7 @@ export function HomeScreen({
           transition={{ delay: 0.2 }}
           className="mb-6"
         >
-          <AIThoughtCard />
+          <AIThoughtCard recentEntries={recentEntries} />
         </motion.div>
 
         {/* Today Status Card */}
