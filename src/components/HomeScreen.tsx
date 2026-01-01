@@ -1,17 +1,21 @@
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sparkles, ChevronRight, Lock } from 'lucide-react';
-import { JournalEntry, JournalMeta, DayStatus } from '@/types/journal';
+import { Bell, Lock, PenLine, Search, Settings } from 'lucide-react';
+import { JournalEntry, JournalMeta } from '@/types/journal';
 import { formatDisplayDate, getTodayString, formatDate, parseDate, addDays } from '@/lib/dateUtils';
 import { getTimeBasedGreeting } from '@/lib/greetingUtils';
-import { AIThoughtCard } from './AIThoughtCard';
-import { TodayStatusCard } from './TodayStatusCard';
-import { RecentEntryCard } from './RecentEntryCard';
+import { Button } from '@/components/ui/button';
+import { AIThoughtCard } from '@/components/AIThoughtCard';
+import { TodayStatusCard } from '@/components/TodayStatusCard';
+import { RecentEntryCard } from '@/components/RecentEntryCard';
+import { notificationService } from '@/services/notifications';
+import { toast } from 'sonner';
 
 import { useCurrentTime } from '@/hooks/useCurrentTime';
 
 interface HomeScreenProps {
   meta: JournalMeta | null;
-  todayEntry: JournalEntry | null;
+  todayEntry: JournalEntry | undefined;
   recentEntries: JournalEntry[];
   onNavigateToWrite: () => void;
   onViewEntry: (date: string) => void;
@@ -24,6 +28,14 @@ export function HomeScreen({
   onNavigateToWrite,
   onViewEntry,
 }: HomeScreenProps) {
+  const navigate = useNavigate();
+
+  const handleEnableNotifications = async () => {
+    const granted = await notificationService.requestPermission();
+    if (granted) {
+      toast.success("You're all set notified!");
+    }
+  };
   const now = useCurrentTime(); // updates every minute
   const greeting = getTimeBasedGreeting(now);
   const todayString = formatDate(now);
@@ -54,25 +66,32 @@ export function HomeScreen({
       <div className="max-w-lg mx-auto px-5 pt-12">
         {/* Header */}
         <motion.header
-          className="mb-12"
+          className="mb-8 flex items-start justify-between"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-
-          <h1 className="font-display text-5xl sm:text-6xl font-bold text-foreground mb-3 tracking-tight">
-            {greeting}
-          </h1>
-
-          <div className="flex flex-col gap-1 pl-1">
-            <p className="text-xl text-foreground/80 font-display italic">
+          <div>
+            <h1 className="font-display text-4xl sm:text-5xl font-bold text-foreground mb-2 tracking-tight">
+              {greeting}
+            </h1>
+            <p className="text-muted-foreground text-sm font-medium flex items-center gap-2">
               {displayDate}
-            </p>
-            <p className="text-sm text-muted-foreground uppercase tracking-wider font-medium flex items-center gap-2">
-              Day {dayIndex} of 365
               <span className="w-1 h-1 rounded-full bg-primary/40" />
-              <span className="font-mono opacity-60">{displayTime}</span>
+              Day {dayIndex}
             </p>
+          </div>
+
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+              onClick={handleEnableNotifications}
+              title="Enable Notifications"
+            >
+              <Bell className="w-5 h-5" />
+            </Button>
           </div>
         </motion.header>
 
