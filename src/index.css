@@ -91,18 +91,25 @@
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    @apply bg-background;
-    /* Ensure html has background to prevent white gaps */
+    /* Force dark background to prevent white flickering/overscroll */
+    background-color: hsl(225 20% 6%) !important;
     overscroll-behavior-y: none;
-    /* Prevent bounce effect */
   }
 
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(225 20% 6%) !important;
+    color: hsl(48 15% 96%);
     font-family: var(--font-body);
     min-height: 100dvh;
     overflow-x: hidden;
     overscroll-behavior-y: none;
+  }
+
+  #root {
+    min-height: 100dvh;
+    background-color: hsl(225 20% 6%) !important;
+    display: flex;
+    flex-direction: column;
   }
 
   ::selection {
