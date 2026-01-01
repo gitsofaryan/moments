@@ -1,69 +1,56 @@
-# Moments - My Year Captured
+# Moments 
+### Capture Your Year, One Day at a Time.
 
-**Moments** is a premium, minimalist digital journal designed to help you capture your year, one day at a time. It features a beautiful dark glass design, private local storage, and a friendly AI companion to help you reflect.
+**Moments** is a premium, private digital journal that lives on your phone but works completely offline. It's designed to help you reflect, remember, and find clarity in your daily life.
 
 ![Moments App Icon](/public/icon.svg)
 
-## ✨ Features
+---
 
--   **Capture the Day**: A distraction-free editor to write your daily thoughts.
--   **AI Companion**: A friendly, analytical AI that offers warm insights on *only* what you wrote today. (Powered by Puter.js)
--   **Offline Ready**: Works perfectly without an internet connection. Write anywhere, anytime.
--   **Private**: Your entries are stored locally on your device (in your browser). No external servers see your private data.
--   **Beautiful Design**: A "Premium Dark Glass" aesthetic with an irregular "Bento" grid for your recent moments.
+## 🌟 Why Moments?
+
+Most journals feel like a chore. Moments is different.
+*   **Zero Distractions**: A beautiful, calm space to just write.
+*   **A Daily Companion**: Our friendly AI reads *only* today's entry and offers a warm, insightful reflection. It's like having a wise friend check in on you.
+*   **Your Data, Your Device**: Everything you write stays in your browser. No accounts, no cloud servers, no prying eyes.
+
+## ✨ Key Features
+
+*   **📱 Native Feel**: Install it on your home screen. It looks and feels just like an app store app.
+*   **🌑 Premium Design**: A sleek "Dark Glass" aesthetic that's easy on the eyes at night.
+*   **⚡ Offline Ready**: In a cabin? On a plane? No internet? No problem. Moments works everywhere.
+*   **📊 Insightful Stats**: Visualize your writing streak with our beautiful "Year in Pixels" calendar.
 
 ---
 
-## 📱 How to Install on Mobile
+## � How to Install
 
-You can install Moments directly to your phone's home screen, just like a native app!
+Moments is a **Progressive Web App (PWA)**. This means you don't need an App Store. fit install it directly from your browser!
 
-### For iPhone (iOS)
-1.  Open the website in **Safari**.
-2.  Tap the **Share** button (box with an arrow pointing up) at the bottom.
+### 🍎 iPhone (iOS)
+1.  Open **Moments** in **Safari**.
+2.  Tap the **Share** button (box with an arrow pointing up).
 3.  Scroll down and tap **"Add to Home Screen"**.
-4.  Confirm the name **Moments** and tap **Add**.
+4.  Tap **Add**.
 
-### For Android
-1.  Open the website in **Chrome**.
-2.  Tap the **Three Dots** menu (top right).
+### 🤖 Android
+1.  Open **Moments** in **Chrome**.
+2.  Tap the **Three Dots** (menu) in the top right.
 3.  Tap **"Install App"** or **"Add to Home Screen"**.
-4.  Follow the prompt to install **Moments**.
+4.  Follow the prompts.
 
-Once installed, it will appear as an app icon on your home screen and launch in full-screen mode.
+**That's it!** You can now open Moments from your home screen, even when you're offline.
 
 ---
 
-## 💻 Running Locally (For Developers)
+## �️ Tech Stack (For Geeks)
 
-If you want to run the code yourself:
+Curious how it's built?
+*   **Frontend**: React, TypeScript, Vite
+*   **Styling**: Tailwind CSS, Shadcn UI, Framer Motion
+*   **AI Engine**: Puter.js (Client-side AI integration)
+*   **Storage**: LocalStorage (100% Client-side privacy)
 
-1.  **Clone the repo**:
-    ```bash
-    git clone https://github.com/yourusername/moments.git
-    cd moments
-    ```
+---
 
-2.  **Install dependencies**:
-    ```bash
-    npm install
-    # or
-    bun install
-    ```
-
-3.  **Run the development server**:
-    ```bash
-    npm run dev
-    # or
-    bun run dev
-    ```
-
-4.  Open `http://localhost:8080` in your browser.
-
-## 🛠️ Stack
-
--   **Framework**: React + Vite
--   **Language**: TypeScript
--   **Styling**: Tailwind CSS + Shadcn UI + Framer Motion
--   **AI**: Puter.js (Client-side AI Service)
--   **Storage**: LocalStorage (Browser)
+*Captured with ❤️ by Moments.*
