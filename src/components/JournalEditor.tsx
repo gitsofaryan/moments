@@ -160,7 +160,7 @@ export function JournalEditor({
           transition={{ delay: 0.2 }}
         >
           <LockIcon className="w-3 h-3" />
-          <span className="font-medium">This day is sealed</span>
+          <span className="font-medium">Day Captured</span>
         </motion.div>
       )}
 

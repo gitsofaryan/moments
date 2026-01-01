@@ -7,6 +7,10 @@ import { toast } from "sonner";
 class AIService {
   // Generate daily home thought
   async generateHomeThought(recentEntries: JournalEntry[]): Promise<string> {
+    if (!navigator.onLine) {
+      return "Focusing on the present moment (Offline Mode).";
+    }
+
     // Combine recent entries into text
     const recentEntriesText = recentEntries
       .map((entry) => {
@@ -16,22 +20,20 @@ class AIService {
       .join("\n\n");
 
     const prompt = `
-You are an observant AI system.
-Based on the most recent journal entry, extract the key sentiment and theme.
+You are a friendly, warm, and insightful AI companion.
+Your goal is to be a supportive friend who cares about how the user's day went.
 
-Data:
+Data (User's Journals):
 ${recentEntriesText}
 
-Strict Rules:
-- NEVER give advice
-- NEVER judge behavior
-- NEVER diagnose emotions
-- NEVER motivate
-- DO NOT act like a therapist or coach
-- JUST OBSERVE and REFLECT
+Instructions:
+1. **Be Friendly**: Start with a warm tone (e.g., "It sounds like...", "I notice...").
+2. **Analyze**: Briefly mention what they did or felt to show you listened.
+3. **Respond**: Offer a kind, insightful reflection on their day.
+4. **No Sarcasm**: Be sincere and genuine.
 
 Output:
-ONE short, observational sentence describing the sentiment or theme found.
+ONE or TWO short, warm sentences connecting with the user about their day.
 `;
 
     try {
@@ -142,6 +144,8 @@ Output:
 
   // Generate full narrative arc (Yearly)
   async generateYearlyReflection(entries: JournalEntry[]): Promise<string> {
+      if (!navigator.onLine) return "Yearly reflection unavailable offline.";
+
       // Logic for yearly (potentially large context, might need summarization strategy later)
       // For now, sampling
       const entriesText = entries
@@ -228,8 +232,13 @@ Output one short sentence.`;
     }
 
     // Generate new thought
-    if (recentEntries.length > 0) {
-      const thought = await this.generateHomeThought(recentEntries);
+    // User requested "Analyze what I did today" ONLY.
+    // If we have an entry for 'date', use ONLY that.
+    const todaysEntry = recentEntries.find((e) => e.date === date);
+    const entriesToAnalyze = todaysEntry ? [todaysEntry] : recentEntries.slice(0, 1);
+
+    if (entriesToAnalyze.length > 0) {
+      const thought = await this.generateHomeThought(entriesToAnalyze);
       await storageService.saveAIThought(date, thought);
       return thought;
     }
@@ -242,8 +251,13 @@ Output one short sentence.`;
     date: string,
     recentEntries: JournalEntry[]
   ): Promise<string> {
-    if (recentEntries.length > 0) {
-      const thought = await this.generateHomeThought(recentEntries);
+    // User requested "Analyze what I did today" ONLY.
+    // If we have an entry for 'date', use ONLY that.
+    const todaysEntry = recentEntries.find((e) => e.date === date);
+    const entriesToAnalyze = todaysEntry ? [todaysEntry] : recentEntries.slice(0, 1);
+
+    if (entriesToAnalyze.length > 0) {
+      const thought = await this.generateHomeThought(entriesToAnalyze);
       await storageService.saveAIThought(date, thought);
       
       // Dispatch event to update UI

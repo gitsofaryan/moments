@@ -77,7 +77,7 @@ export function DayHeader({
           {isLocked ? (
             <>
               <Lock className="w-3.5 h-3.5 text-journal-locked" />
-              <span className="text-journal-locked">This day is sealed</span>
+              <span className="text-journal-locked">Day Captured</span>
             </>
           ) : (
             <>

@@ -12,36 +12,46 @@ export function RecentEntryCard({ entry, onClick, className = "" }: RecentEntryC
   const isLocked = isEntryLocked(entry.createdAt);
   const displayDate = formatDisplayDate(entry.date);
 
+  // Extract preview text
+  const previewText = entry.contentHtml
+    ? entry.contentHtml.replace(/<[^>]*>/g, ' ').trim().slice(0, 60)
+    : '';
+
   return (
     <motion.button
       type="button"
       onClick={onClick}
-      className={`floating-card transition-all duration-300 w-full p-5 flex flex-col justify-between group hover:border-white/20 hover:shadow-glow hover:-translate-y-1 ${className}`}
+      className={`floating-card relative transition-all duration-300 w-full p-5 flex flex-col justify-between items-start text-left group hover:border-white/20 hover:shadow-glow hover:-translate-y-1 ${className}`}
       whileTap={{ scale: 0.95 }}
       whileHover={{ scale: 1.02 }}
       transition={{ type: "spring", stiffness: 400, damping: 17 }}
     >
-      <div className="flex justify-between items-start w-full mb-3">
-        <span className="text-xl font-display font-bold text-white/90 group-hover:text-primary transition-colors">
-          {displayDate.split(' ')[0]}
-          <span className="block text-xs font-sans font-normal text-muted-foreground uppercase tracking-wider mt-1">
-            {displayDate.split(' ').slice(1).join(' ')}
-          </span>
+      {/* Header: Date + Lock */}
+      <div className="w-full flex justify-between items-start mb-3">
+        <span className="text-xs font-sans font-medium text-primary uppercase tracking-wider opacity-90">
+          {displayDate}
         </span>
         {isLocked && (
-          <Lock className="w-4 h-4 text-white/40" />
+          <Lock className="w-3.5 h-3.5 text-white/30" />
         )}
       </div>
 
-      <div className="w-full text-left">
+      {/* Content */}
+      <div className="w-full">
         {entry.title ? (
-          <h4 className="text-sm font-medium text-white/80 line-clamp-3 leading-snug group-hover:text-white transition-colors">
+          <h4 className="font-display text-lg leading-tight text-white/95 group-hover:text-white transition-colors mb-2 line-clamp-2">
             {entry.title}
           </h4>
         ) : (
-          <h4 className="text-sm text-white/40 italic">
+          <h4 className="font-display text-lg text-white/40 italic mb-2">
             Untitled
           </h4>
+        )}
+
+        {previewText && (
+          <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed opacity-80">
+            {previewText}...
+          </p>
         )}
       </div>
     </motion.button>

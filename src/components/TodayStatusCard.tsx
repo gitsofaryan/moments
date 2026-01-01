@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { PenLine, ChevronRight, Clock } from 'lucide-react';
 import { JournalEntry } from '@/types/journal';
-import { isEntryLocked, getTimeUntilLock, formatTimeRemaining } from '@/lib/dateUtils';
+import { isEntryLocked, getTimeUntilLock, formatTimeRemaining, formatDisplayDate } from '@/lib/dateUtils';
 
 interface TodayStatusCardProps {
   entry: JournalEntry | null;
@@ -12,6 +12,8 @@ export function TodayStatusCard({ entry, onWriteClick }: TodayStatusCardProps) {
   const hasWritten = entry && (entry.title.trim() || entry.contentHtml.replace(/<[^>]*>/g, '').trim());
   const isLocked = entry ? isEntryLocked(entry.createdAt) : false;
   const timeRemaining = entry ? getTimeUntilLock(entry.createdAt) : 0;
+
+  const displayDate = entry ? formatDisplayDate(entry.date) : formatDisplayDate(new Date().toISOString().split('T')[0]);
 
   if (!hasWritten) {
     return (
@@ -56,7 +58,7 @@ export function TodayStatusCard({ entry, onWriteClick }: TodayStatusCardProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-xs font-medium text-primary">Today's entry</span>
+            <span className="text-xs font-medium text-primary uppercase tracking-wider">{displayDate}</span>
             {!isLocked && timeRemaining > 0 && timeRemaining < 14400000 && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="w-3 h-3" />
