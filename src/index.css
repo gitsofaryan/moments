@@ -97,7 +97,13 @@
     @apply bg-background text-foreground;
     font-family: var(--font-body);
     min-height: 100dvh;
+    min-height: 100dvh;
     overflow-x: hidden;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.3);
+    color: hsl(var(--foreground));
   }
 
   /* Custom scrollbar for dark theme */

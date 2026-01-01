@@ -31,25 +31,33 @@ export function CalendarScreen({ days, meta, onDayClick }: CalendarScreenProps) 
       <div className="max-w-2xl mx-auto px-5 pt-10 sm:pt-12">
         {/* Header */}
         <motion.header
-          className="mb-10"
+          className="mb-12 text-center sm:text-left"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <h1 className="font-display text-4xl sm:text-5xl font-semibold text-foreground mb-2">
-            Your Year
-          </h1>
-          <p className="text-muted-foreground">{entriesCount} of 365 days recorded</p>
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-4">
+            <div>
+              <h1 className="font-display text-5xl sm:text-6xl font-bold text-foreground tracking-tight">
+                2026
+              </h1>
+              <p className="text-muted-foreground text-lg mt-1 font-display italic">
+                {entriesCount} moments captured
+              </p>
+            </div>
+
+            <div className="text-right hidden sm:block">
+              <span className="text-4xl font-display font-medium text-primary">{Math.round((entriesCount / 365) * 100)}%</span>
+              <span className="text-muted-foreground ml-1 text-sm">completed</span>
+            </div>
+          </div>
 
           {/* Progress bar */}
-          <div className="mt-5 h-1.5 bg-muted rounded-full overflow-hidden">
+          <div className="h-2 bg-secondary/50 rounded-full overflow-hidden w-full ring-1 ring-white/5">
             <motion.div
-              className="h-full rounded-full"
-              style={{
-                background: 'linear-gradient(90deg, hsl(35 85% 58%), hsl(28 80% 52%))',
-              }}
+              className="h-full rounded-full bg-gradient-to-r from-journal-amber to-journal-amber-glow"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
-              transition={{ duration: 1, delay: 0.3, ease: 'easeOut' }}
+              transition={{ duration: 1.5, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
             />
           </div>
         </motion.header>

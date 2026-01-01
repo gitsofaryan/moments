@@ -54,21 +54,26 @@ export function HomeScreen({
       <div className="max-w-lg mx-auto px-5 pt-12">
         {/* Header */}
         <motion.header
-          className="mb-10"
+          className="mb-12"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-muted-foreground text-sm">{displayDate}</p>
-            <p className="text-muted-foreground text-sm font-medium bg-primary/10 px-2 py-0.5 rounded-full">{displayTime}</p>
-          </div>
-          <h1 className="font-display text-4xl font-semibold text-foreground mb-1">
+
+          <h1 className="font-display text-5xl sm:text-6xl font-bold text-foreground mb-3 tracking-tight">
             {greeting}
           </h1>
-          <p className="text-muted-foreground">
-            Day {dayIndex} of 365
-          </p>
+
+          <div className="flex flex-col gap-1 pl-1">
+            <p className="text-xl text-foreground/80 font-display italic">
+              {displayDate}
+            </p>
+            <p className="text-sm text-muted-foreground uppercase tracking-wider font-medium flex items-center gap-2">
+              Day {dayIndex} of 365
+              <span className="w-1 h-1 rounded-full bg-primary/40" />
+              <span className="font-mono opacity-60">{displayTime}</span>
+            </p>
+          </div>
         </motion.header>
 
         {/* AI Thought Card */}
