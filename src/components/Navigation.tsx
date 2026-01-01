@@ -1,92 +1,46 @@
 import { motion } from 'framer-motion';
-import { Calendar, PenLine, ChevronLeft, ChevronRight } from 'lucide-react';
-import { ViewMode } from '@/types/journal';
+import { Home, PenLine, Calendar } from 'lucide-react';
+
+export type Route = 'home' | 'write' | 'calendar';
 
 interface NavigationProps {
-  currentView: ViewMode;
-  onViewChange: (view: ViewMode) => void;
-  canGoBack?: boolean;
-  canGoForward?: boolean;
-  onNavigate?: (direction: 'prev' | 'next') => void;
-  showDayNav?: boolean;
+  currentRoute: Route;
+  onNavigate: (route: Route) => void;
 }
 
-export function Navigation({ 
-  currentView, 
-  onViewChange,
-  canGoBack = false,
-  canGoForward = false,
-  onNavigate,
-  showDayNav = false
-}: NavigationProps) {
+export function Navigation({ currentRoute, onNavigate }: NavigationProps) {
   return (
-    <motion.nav 
-      className="fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-lg border-t border-border/50 safe-bottom"
+    <motion.nav
+      className="fixed bottom-0 left-0 right-0 z-50 safe-bottom"
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
     >
-      <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-        {/* Day navigation (when on entry view) */}
-        {showDayNav && onNavigate && (
-          <div className="flex items-center gap-1">
-            <motion.button
-              type="button"
-              onClick={() => onNavigate('prev')}
-              disabled={!canGoBack}
-              className={`
-                p-2 rounded-full transition-all duration-200
-                ${canGoBack 
-                  ? 'text-foreground hover:bg-muted' 
-                  : 'text-muted-foreground/30 cursor-not-allowed'
-                }
-              `}
-              whileTap={canGoBack ? { scale: 0.9 } : undefined}
-              aria-label="Previous day"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </motion.button>
-            
-            <motion.button
-              type="button"
-              onClick={() => onNavigate('next')}
-              disabled={!canGoForward}
-              className={`
-                p-2 rounded-full transition-all duration-200
-                ${canGoForward 
-                  ? 'text-foreground hover:bg-muted' 
-                  : 'text-muted-foreground/30 cursor-not-allowed'
-                }
-              `}
-              whileTap={canGoForward ? { scale: 0.9 } : undefined}
-              aria-label="Next day"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </motion.button>
-          </div>
-        )}
+      {/* Glass background */}
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-xl border-t border-border/30" />
 
-        {/* Spacer when not showing day nav */}
-        {!showDayNav && <div />}
-
-        {/* Main view toggles */}
-        <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-full">
+      <div className="relative max-w-lg mx-auto px-6 py-4">
+        <div className="flex items-center justify-around">
+          <NavButton
+            icon={Home}
+            label="Home"
+            isActive={currentRoute === 'home'}
+            onClick={() => onNavigate('home')}
+          />
           <NavButton
             icon={PenLine}
-            isActive={currentView === 'today' || currentView === 'entry'}
-            onClick={() => onViewChange('today')}
             label="Write"
+            isActive={currentRoute === 'write'}
+            onClick={() => onNavigate('write')}
+            isPrimary
           />
           <NavButton
             icon={Calendar}
-            isActive={currentView === 'year'}
-            onClick={() => onViewChange('year')}
-            label="Year"
+            label="Calendar"
+            isActive={currentRoute === 'calendar'}
+            onClick={() => onNavigate('calendar')}
           />
         </div>
-
-        {/* Spacer for symmetry */}
-        {showDayNav ? <div className="w-20" /> : <div />}
       </div>
     </motion.nav>
   );
@@ -94,28 +48,44 @@ export function Navigation({
 
 interface NavButtonProps {
   icon: React.ComponentType<{ className?: string }>;
+  label: string;
   isActive: boolean;
   onClick: () => void;
-  label: string;
+  isPrimary?: boolean;
 }
 
-function NavButton({ icon: Icon, isActive, onClick, label }: NavButtonProps) {
+function NavButton({ icon: Icon, label, isActive, onClick, isPrimary }: NavButtonProps) {
   return (
     <motion.button
       type="button"
       onClick={onClick}
       className={`
-        flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200
-        ${isActive 
-          ? 'bg-primary text-primary-foreground' 
-          : 'text-muted-foreground hover:text-foreground'
+        flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-200
+        ${isActive
+          ? isPrimary
+            ? 'text-primary'
+            : 'text-foreground'
+          : 'text-muted-foreground'
         }
       `}
-      whileTap={{ scale: 0.95 }}
+      whileTap={{ scale: 0.9 }}
       aria-label={label}
     >
-      <Icon className="w-4 h-4" />
-      <span className="text-sm font-medium">{label}</span>
+      <motion.div
+        className={`
+          p-2 rounded-xl transition-all duration-200
+          ${isActive && isPrimary
+            ? 'bg-primary/15'
+            : isActive
+              ? 'bg-muted'
+              : ''
+          }
+        `}
+        animate={isActive ? { scale: 1.05 } : { scale: 1 }}
+      >
+        <Icon className="w-5 h-5" />
+      </motion.div>
+      <span className="text-xs font-medium">{label}</span>
     </motion.button>
   );
 }

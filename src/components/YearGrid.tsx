@@ -15,10 +15,10 @@ export function YearGrid({ days, onDayClick }: YearGridProps) {
     let currentMonth = '';
     let currentGroup: DayStatus[] = [];
 
-    days.forEach(day => {
+    days.forEach((day) => {
       const date = parseDate(day.date);
       const monthName = getMonthName(date.getMonth());
-      
+
       if (monthName !== currentMonth) {
         if (currentGroup.length > 0) {
           groups.push({ month: currentMonth, days: currentGroup });
@@ -38,14 +38,14 @@ export function YearGrid({ days, onDayClick }: YearGridProps) {
   }, [days]);
 
   return (
-    <motion.div 
+    <motion.div
       className="space-y-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
       {monthGroups.map((group, groupIndex) => (
-        <motion.div 
+        <motion.div
           key={group.month}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -54,14 +54,14 @@ export function YearGrid({ days, onDayClick }: YearGridProps) {
           <h3 className="font-display text-lg text-muted-foreground mb-4">
             {group.month}
           </h3>
-          
+
           <div className="grid grid-cols-7 gap-2 sm:gap-3">
             {group.days.map((day, dayIndex) => (
-              <YearDot 
-                key={day.date} 
-                day={day} 
+              <YearDot
+                key={day.date}
+                day={day}
                 onClick={() => onDayClick(day.date)}
-                delay={groupIndex * 0.05 + dayIndex * 0.01}
+                delay={groupIndex * 0.03 + dayIndex * 0.008}
               />
             ))}
           </div>
@@ -78,14 +78,16 @@ interface YearDotProps {
 }
 
 function YearDot({ day, onClick, delay }: YearDotProps) {
-  const size = day.hasEntry 
-    ? Math.min(100, 60 + (day.wordCount || 0) / 5) 
-    : 40;
-
-  const getStatusClass = () => {
-    if (day.isFuture) return 'bg-muted/30 cursor-not-allowed';
-    if (day.isToday) return 'bg-primary ring-2 ring-primary/50 ring-offset-2 ring-offset-background';
-    if (day.hasEntry) return 'bg-journal-dot-filled amber-glow cursor-pointer';
+  const getStatusStyles = () => {
+    if (day.isFuture) {
+      return 'bg-muted/20 cursor-not-allowed';
+    }
+    if (day.isToday) {
+      return 'bg-primary ring-2 ring-primary/40 ring-offset-2 ring-offset-background';
+    }
+    if (day.hasEntry) {
+      return 'bg-journal-dot-filled shadow-[0_0_12px_hsl(35_85%_58%_/_0.3)] cursor-pointer';
+    }
     return 'bg-journal-dot-empty cursor-pointer hover:bg-muted';
   };
 
@@ -96,22 +98,17 @@ function YearDot({ day, onClick, delay }: YearDotProps) {
       disabled={day.isFuture}
       className={`
         aspect-square rounded-full transition-all duration-300
-        ${getStatusClass()}
+        ${getStatusStyles()}
       `}
-      style={{ 
-        width: `${size}%`,
-        maxWidth: '100%',
-        margin: 'auto'
-      }}
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      transition={{ 
+      transition={{
         delay,
         type: 'spring',
-        stiffness: 300,
-        damping: 20
+        stiffness: 400,
+        damping: 25,
       }}
-      whileHover={!day.isFuture ? { scale: 1.2 } : undefined}
+      whileHover={!day.isFuture ? { scale: 1.3 } : undefined}
       whileTap={!day.isFuture ? { scale: 0.9 } : undefined}
       aria-label={`Day ${day.dayIndex}: ${day.date}`}
     />

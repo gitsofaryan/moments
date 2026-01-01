@@ -1,69 +1,78 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { Navigation } from '@/components/Navigation';
-import { TodayScreen } from '@/components/TodayScreen';
-import { YearScreen } from '@/components/YearScreen';
+import { Navigation, Route } from '@/components/Navigation';
+import { HomeScreen } from '@/components/HomeScreen';
+import { WriteScreen } from '@/components/WriteScreen';
+import { CalendarScreen } from '@/components/CalendarScreen';
 import { useJournal } from '@/hooks/useJournal';
-import { ViewMode } from '@/types/journal';
-import { getTodayString, formatDate, parseDate, addDays, isDateInFuture } from '@/lib/dateUtils';
+import { getTodayString, parseDate, formatDate, addDays } from '@/lib/dateUtils';
 
 const Index = () => {
-  const [currentView, setCurrentView] = useState<ViewMode>('today');
-  const [currentDate, setCurrentDate] = useState(getTodayString());
-  
-  const { 
-    meta, 
-    isLoading, 
-    getEntry, 
-    createOrUpdateEntry, 
+  const [currentRoute, setCurrentRoute] = useState<Route>('home');
+  const [selectedDate, setSelectedDate] = useState(getTodayString());
+
+  const {
+    entries,
+    meta,
+    isLoading,
+    getEntry,
+    createOrUpdateEntry,
     getDayStatus,
-    getAllDayStatuses 
+    getAllDayStatuses,
   } = useJournal();
 
-  const dayStatus = getDayStatus(currentDate);
-  const entry = getEntry(currentDate);
+  const todayEntry = getEntry(getTodayString());
+  const dayStatus = getDayStatus(selectedDate);
+  const currentEntry = getEntry(selectedDate);
 
-  const handleViewChange = useCallback((view: ViewMode) => {
-    if (view === 'today') {
-      setCurrentDate(getTodayString());
+  // Get recent entries (last 5-7 days with content, excluding today)
+  const recentEntries = useMemo(() => {
+    if (!meta) return [];
+
+    const today = getTodayString();
+    const result = [];
+    const startDate = parseDate(meta.startDate);
+
+    // Go back up to 14 days to find 5 entries
+    for (let i = 1; i <= 14 && result.length < 5; i++) {
+      const date = formatDate(addDays(new Date(), -i));
+      const entry = entries[date];
+      if (entry && (entry.title.trim() || entry.contentHtml.replace(/<[^>]*>/g, '').trim())) {
+        result.push(entry);
+      }
     }
-    setCurrentView(view);
+
+    return result;
+  }, [entries, meta]);
+
+  const handleNavigate = useCallback((route: Route) => {
+    if (route === 'write') {
+      setSelectedDate(getTodayString());
+    }
+    setCurrentRoute(route);
   }, []);
 
   const handleDayClick = useCallback((date: string) => {
-    setCurrentDate(date);
-    setCurrentView('entry');
+    setSelectedDate(date);
+    setCurrentRoute('write');
   }, []);
 
-  const handleSave = useCallback((date: string, title: string, content: string) => {
-    createOrUpdateEntry(date, title, content);
-  }, [createOrUpdateEntry]);
+  const handleSave = useCallback(
+    (date: string, title: string, content: string) => {
+      createOrUpdateEntry(date, title, content);
+    },
+    [createOrUpdateEntry]
+  );
 
-  const handleNavigate = useCallback((direction: 'prev' | 'next') => {
-    const current = parseDate(currentDate);
-    const newDate = addDays(current, direction === 'next' ? 1 : -1);
-    const newDateString = formatDate(newDate);
-    
-    // Don't navigate to future dates
-    if (direction === 'next' && isDateInFuture(newDateString)) {
-      return;
-    }
-    
-    // Don't navigate before journey start
-    if (meta && direction === 'prev') {
-      const startDate = parseDate(meta.startDate);
-      if (newDate < startDate) {
-        return;
-      }
-    }
-    
-    setCurrentDate(newDateString);
-  }, [currentDate, meta]);
+  const handleNavigateToWrite = useCallback(() => {
+    setSelectedDate(getTodayString());
+    setCurrentRoute('write');
+  }, []);
 
-  // Calculate navigation availability
-  const canGoBack = meta ? currentDate !== meta.startDate : false;
-  const canGoForward = !isDateInFuture(formatDate(addDays(parseDate(currentDate), 1)));
-  const isToday = currentDate === getTodayString();
+  const handleViewEntry = useCallback((date: string) => {
+    setSelectedDate(date);
+    setCurrentRoute('write');
+  }, []);
 
   if (isLoading) {
     return (
@@ -78,42 +87,39 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Ambient glow effect */}
-      <div 
-        className="fixed top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] pointer-events-none opacity-30"
-        style={{
-          background: 'radial-gradient(ellipse at center, hsl(38 92% 60% / 0.15), transparent 70%)'
-        }}
-      />
-
       <AnimatePresence mode="wait">
-        {currentView === 'year' ? (
-          <YearScreen 
-            key="year"
+        {currentRoute === 'home' && (
+          <HomeScreen
+            key="home"
+            meta={meta}
+            todayEntry={todayEntry}
+            recentEntries={recentEntries}
+            onNavigateToWrite={handleNavigateToWrite}
+            onViewEntry={handleViewEntry}
+          />
+        )}
+
+        {currentRoute === 'write' && (
+          <WriteScreen
+            key={`write-${selectedDate}`}
+            date={selectedDate}
+            dayIndex={dayStatus.dayIndex}
+            entry={currentEntry}
+            onSave={handleSave}
+          />
+        )}
+
+        {currentRoute === 'calendar' && (
+          <CalendarScreen
+            key="calendar"
             days={getAllDayStatuses()}
             meta={meta}
             onDayClick={handleDayClick}
           />
-        ) : (
-          <TodayScreen 
-            key={currentDate}
-            date={currentDate}
-            dayIndex={dayStatus.dayIndex}
-            entry={entry}
-            onSave={handleSave}
-            isToday={isToday}
-          />
         )}
       </AnimatePresence>
 
-      <Navigation 
-        currentView={currentView}
-        onViewChange={handleViewChange}
-        canGoBack={canGoBack}
-        canGoForward={canGoForward}
-        onNavigate={handleNavigate}
-        showDayNav={currentView !== 'year'}
-      />
+      <Navigation currentRoute={currentRoute} onNavigate={handleNavigate} />
     </div>
   );
 };
