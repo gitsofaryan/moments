@@ -16,31 +16,31 @@ export function RecentEntryCard({ entry, onClick }: RecentEntryCardProps) {
     <motion.button
       type="button"
       onClick={onClick}
-      className="entry-card w-full text-left"
-      whileTap={{ scale: 0.98 }}
+      className="floating-card active:scale-95 transition-all duration-300 w-full aspect-square p-5 flex flex-col justify-between group hover:border-white/20 hover:shadow-glow"
+      whileTap={{ scale: 0.95 }}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs text-muted-foreground">{displayDate}</span>
-            {isLocked && (
-              <Lock className="w-3 h-3 text-muted-foreground/60" />
-            )}
-          </div>
-          
-          {entry.title ? (
-            <h4 className="text-sm font-medium text-foreground truncate">
-              {entry.title}
-            </h4>
-          ) : (
-            <h4 className="text-sm text-muted-foreground italic">
-              Untitled
-            </h4>
-          )}
-        </div>
+      <div className="flex justify-between items-start w-full">
+        <span className="text-xl font-display font-bold text-white/90 group-hover:text-primary transition-colors">
+          {displayDate.split(' ')[0]}
+          <span className="block text-xs font-sans font-normal text-muted-foreground uppercase tracking-wider mt-1">
+            {displayDate.split(' ').slice(1).join(' ')}
+          </span>
+        </span>
+        {isLocked && (
+          <Lock className="w-4 h-4 text-white/40" />
+        )}
+      </div>
 
-        {/* Small indicator dot */}
-        <div className="w-2 h-2 rounded-full bg-journal-dot-filled mt-2 flex-shrink-0" />
+      <div className="w-full text-left">
+        {entry.title ? (
+          <h4 className="text-sm font-medium text-white/80 line-clamp-3 leading-snug group-hover:text-white transition-colors">
+            {entry.title}
+          </h4>
+        ) : (
+          <h4 className="text-sm text-white/40 italic">
+            Untitled
+          </h4>
+        )}
       </div>
     </motion.button>
   );

@@ -1,6 +1,7 @@
 import { puterService } from "./puter";
 import { storageService } from "./storage";
 import { JournalEntry } from "@/types/journal";
+import { toast } from "sonner";
 
 // AI Service using puter.ai.chat() - No external backend
 class AIService {
@@ -15,22 +16,20 @@ class AIService {
       .join("\n\n");
 
     const prompt = `
-You are a quiet observer.
+You are a sarcastic, dry-witted observer of my life.
 
-Based on the following journal text, write ONE short reflective thought.
-Do not give advice.
-Do not judge.
-Do not motivate.
-Just observe patterns or tone.
+Based on the following journal text, write ONE short, witty, slightly roasty comment.
+Don't be mean, just dry and funny.
+Poke fun at my patterns or complaints to make me laugh.
 
 Journal:
 ${recentEntriesText}
 
-Output only one sentence.`;
+Output only one short sentence.`;
 
     try {
       const thought = await puterService.chat(prompt, {
-        model: "gpt-5-nano",
+        model: "grok-4-fast",
         temperature: 0.6,
         max_tokens: 60,
       });
@@ -38,6 +37,7 @@ Output only one sentence.`;
       return thought;
     } catch (error) {
       console.error("Failed to generate home thought:", error);
+      toast.error("AI Service Error: Please ensure you are signed in to Puter.");
       return "Your journey continues...";
     }
   }
@@ -68,7 +68,7 @@ Output 2-3 sentences.`;
 
     try {
       const summary = await puterService.chat(prompt, {
-        model: "gpt-5-nano",
+        model: "grok-4-fast",
         temperature: 0.5,
         max_tokens: 150,
       });
@@ -109,7 +109,7 @@ Output 3-4 sentences.`;
 
     try {
       const reflection = await puterService.chat(prompt, {
-        model: "gpt-5-nano",
+        model: "grok-4-fast",
         temperature: 0.5,
         max_tokens: 200,
       });
@@ -124,18 +124,15 @@ Output 3-4 sentences.`;
   // Generate gentle notification thought
   async generateNotificationThought(): Promise<string> {
     const prompt = `
-Write one gentle reflective notification.
-No commands.
-No reminders.
-No pressure.
-
-It should feel like a thought, not a task.
+Write one short, sarcastic notification to get my attention.
+Be dry. Be witty.
+Maybe imply I'm procrastinating or forgetting something.
 
 Output one short sentence.`;
 
     try {
       const thought = await puterService.chat(prompt, {
-        model: "gpt-5-nano",
+        model: "grok-4-fast",
         temperature: 0.7,
         max_tokens: 40,
       });
@@ -165,6 +162,25 @@ Output one short sentence.`;
       return thought;
     }
 
+    return "Your journey begins today.";
+  }
+
+  // Force regenerate today's thought (e.g., after a new entry)
+  async regenerateTodayThought(
+    date: string,
+    recentEntries: JournalEntry[]
+  ): Promise<string> {
+    if (recentEntries.length > 0) {
+      const thought = await this.generateHomeThought(recentEntries);
+      await storageService.saveAIThought(date, thought);
+      
+      // Dispatch event to update UI
+      window.dispatchEvent(new CustomEvent('ai-thought-updated', { 
+        detail: { date, thought } 
+      }));
+      
+      return thought;
+    }
     return "Your journey begins today.";
   }
 }

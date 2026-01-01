@@ -23,13 +23,18 @@ class PuterService {
   }
 
   // Check and ensure authentication
-  async ensureAuth(): Promise<boolean> {
+  async ensureAuth(attemptSignIn = true): Promise<boolean> {
     await this.init();
 
     try {
       const isSignedIn = window.puter.auth.isSignedIn();
 
       if (!isSignedIn) {
+        // If we shouldn't attempt sign-in (e.g. on initial load), just return false
+        if (!attemptSignIn) {
+          return false;
+        }
+
         // Trigger Puter authentication flow
         const result = await window.puter.auth.signIn();
         this.authChecked = true;
@@ -138,7 +143,8 @@ class PuterService {
       max_tokens?: number;
     } = {}
   ): Promise<string> {
-    await this.ensureAuth();
+    const auth = await this.ensureAuth(false);
+    if (!auth) throw new Error("Not authenticated");
     try {
       const response = await window.puter.ai.chat(prompt, {
         model: options.model || "gpt-4o-mini",

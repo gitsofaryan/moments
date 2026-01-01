@@ -3,38 +3,47 @@ import { Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { aiService } from '@/services/ai';
 import { getTodayString } from '@/lib/dateUtils';
+import { useJournal } from '@/hooks/useJournal';
+import { JournalEntry } from '@/types/journal';
 
-interface AIThoughtCardProps {
-  recentEntries?: any[];
-}
-
-export function AIThoughtCard({ recentEntries = [] }: AIThoughtCardProps) {
-  const [thought, setThought] = useState('Your journey begins today.');
+export function AIThoughtCard() {
+  const [thought, setThought] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const { entries } = useJournal();
 
   useEffect(() => {
-    async function loadThought() {
-      // Wait for Puter to be available
-      if (!window.puter) {
-        setThought('Your journey begins today.');
-        setIsLoading(false);
-        return;
-      }
+    const fetchInsight = async () => {
+      setIsLoading(true);
+      const recentEntries = (Object.values(entries) as JournalEntry[])
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 5); // Take last 5 for context
 
       try {
-        const today = getTodayString();
-        const generatedThought = await aiService.ensureTodayThought(today, recentEntries);
-        setThought(generatedThought);
+        const insight = await aiService.ensureTodayThought(getTodayString(), recentEntries);
+        setThought(insight);
       } catch (error) {
         console.error('Failed to load AI thought:', error);
-        setThought('Your journey continues...');
+        setThought('Your journey continues...'); // Fallback message
       } finally {
         setIsLoading(false);
       }
-    }
+    };
 
-    loadThought();
-  }, [recentEntries]);
+    fetchInsight();
+
+    // Listen for updates
+    const handleUpdate = (e: CustomEvent<{ date: string; thought: string }>) => {
+      if (e.detail.date === getTodayString()) {
+        setThought(e.detail.thought);
+      }
+    };
+
+    window.addEventListener('ai-thought-updated', handleUpdate as EventListener);
+
+    return () => {
+      window.removeEventListener('ai-thought-updated', handleUpdate as EventListener);
+    };
+  }, [entries]);
 
   return (
     <motion.div

@@ -79,6 +79,22 @@ export function useJournal() {
       localStorage.setItem(META_KEY, JSON.stringify(updated));
       return updated;
     });
+
+    // Background AI Trigger (Fire and forget)
+    // We import aiService dynamically or use the global one to avoid circular deps if needed
+    // But since this is a hook, we can just call the service method
+    import('@/services/ai').then(({ aiService }) => {
+      // Small delay to let UI settle
+      setTimeout(() => {
+        // Collect recent entries for context
+        const recentEntries = Object.values(entries)
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+          .slice(0, 5);
+        
+        // Force refresh today's thought if we just saved today's entry
+        aiService.regenerateTodayThought(entry.date, recentEntries).catch(console.error);
+      }, 2000);
+    });
   }, [entries]);
 
   const getEntry = useCallback((date: string): JournalEntry | null => {

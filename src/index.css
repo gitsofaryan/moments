@@ -51,21 +51,19 @@
     --journal-dot-empty: 225 14% 24%;
     --journal-dot-filled: 38 88% 60%;
 
-    /* Premium gradients */
+    /* Premium gradients - Glassmorphic */
     --gradient-amber: linear-gradient(135deg, hsl(38 92% 62%), hsl(32 88% 56%));
-    --gradient-warm: linear-gradient(135deg, hsl(38 92% 62% / 0.18), hsl(285 65% 58% / 0.10));
-    --gradient-surface: linear-gradient(180deg, hsl(225 18% 12%), hsl(225 20% 7%));
-    --gradient-card: linear-gradient(135deg, hsl(225 18% 13%), hsl(225 16% 10%));
-    --gradient-glow: radial-gradient(ellipse at center, hsl(38 92% 62% / 0.15), transparent 70%);
-    --gradient-subtle: linear-gradient(180deg, hsl(225 16% 16%), hsl(225 18% 11%));
+    --gradient-warm: linear-gradient(135deg, hsl(38 92% 62% / 0.15), hsl(285 65% 58% / 0.10));
+    --gradient-surface: linear-gradient(160deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+    --gradient-card: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
 
     /* Enhanced shadows with depth */
-    --shadow-soft: 0 6px 32px -8px hsl(0 0% 0% / 0.4);
-    --shadow-amber: 0 0 48px -10px hsl(38 92% 62% / 0.3);
-    --shadow-float: 0 16px 64px -16px hsl(0 0% 0% / 0.6);
-    --shadow-card: 0 10px 40px -10px hsl(0 0% 0% / 0.5);
-    --shadow-glow: 0 0 72px -12px hsl(38 92% 62% / 0.25);
-    --shadow-inner: inset 0 2px 8px hsl(0 0% 0% / 0.15);
+    --shadow-soft: 0 8px 32px -8px rgba(0, 0, 0, 0.3);
+    --shadow-amber: 0 0 40px -10px hsl(38 92% 62% / 0.2);
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --shadow-glow: 0 0 72px -12px hsl(38 92% 62% / 0.15);
+    --shadow-border: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -123,38 +121,36 @@
 }
 
 @layer components {
+
   /* Floating card styles - iOS-like */
-  .floating-card {
-    @apply rounded-2xl;
-    background: linear-gradient(135deg, hsl(var(--card)), hsl(230 10% 10%));
-    border: 1px solid hsl(var(--border) / 0.6);
-    box-shadow: var(--shadow-card);
-  }
-
-  .floating-card-elevated {
-    @apply rounded-2xl;
-    background: linear-gradient(135deg, hsl(var(--journal-surface-elevated)), hsl(230 10% 12%));
-    border: 1px solid hsl(var(--border) / 0.5);
-    box-shadow: var(--shadow-float);
-  }
-
   /* Glass morphism card */
   .glass-card {
-    background: hsl(var(--card) / 0.7);
+    background: var(--gradient-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: var(--shadow-glass);
+  }
+
+  .floating-card {
+    @apply rounded-3xl;
+    background: var(--gradient-card);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid hsl(var(--border) / 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: var(--shadow-soft);
   }
 
-  /* AI thought card - special styling */
+  /* AI thought card - glass styling */
   .thought-card {
-    @apply rounded-3xl p-6;
-    background: linear-gradient(135deg, hsl(230 12% 14%), hsl(230 10% 11%));
-    border: 1px solid hsl(var(--border) / 0.5);
-    box-shadow: 
-      var(--shadow-card),
-      inset 0 1px 0 hsl(var(--border) / 0.3);
+    @apply rounded-[2.5rem] p-8;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+      0 8px 32px 0 rgba(0, 0, 0, 0.3),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05);
   }
 
   .thought-card::before {
@@ -266,6 +262,7 @@
 }
 
 @layer utilities {
+
   /* Safe area for mobile */
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0);
@@ -302,29 +299,49 @@
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
 
   @keyframes slideUp {
-    from { 
-      opacity: 0; 
-      transform: translateY(20px); 
+    from {
+      opacity: 0;
+      transform: translateY(20px);
     }
-    to { 
-      opacity: 1; 
-      transform: translateY(0); 
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 
   @keyframes pulseSoft {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.7;
+    }
   }
 
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-4px);
+    }
   }
 
   .animate-float {

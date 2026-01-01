@@ -1,126 +1,93 @@
-import { puterService } from "./puter";
 import { JournalEntry, JournalMeta } from "@/types/journal";
 
-// All storage using Puter FS - No backend
+// Local Storage Service
 class StorageService {
-  private readonly ENTRIES_PATH = "/journey/entries";
-  private readonly META_PATH = "/journey/meta.json";
-  private readonly AI_PATH = "/journey/ai";
+  private readonly STORAGE_KEYS = {
+    ENTRIES: "journey_entries",
+    META: "journey_meta",
+    AI_THOUGHTS: "journey_ai_thoughts",
+    WEEKLY_SUMMARIES: "journey_weekly_summaries"
+  };
 
-  // Entry Operations
-  async getEntry(date: string): Promise<JournalEntry | null> {
+  // Helper to safe parse JSON
+  private getFromStorage<T>(key: string): T | null {
     try {
-      return await puterService.readFile(`${this.ENTRIES_PATH}/${date}.json`);
-    } catch (error) {
-      console.error("Failed to get entry:", error);
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : null;
+    } catch (e) {
+      console.error(`Error reading ${key} from localStorage`, e);
       return null;
     }
   }
 
-  async saveEntry(entry: JournalEntry): Promise<void> {
+  // Helper to save to storage
+  private saveToStorage(key: string, data: any): void {
     try {
-      await puterService.writeFile(
-        `${this.ENTRIES_PATH}/${entry.date}.json`,
-        entry
-      );
-    } catch (error) {
-      console.error("Failed to save entry:", error);
-      throw error;
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {
+      console.error(`Error writing ${key} to localStorage`, e);
     }
+  }
+
+  // Entry Operations
+  async getEntry(date: string): Promise<JournalEntry | null> {
+    const entries = this.getFromStorage<Record<string, JournalEntry>>(this.STORAGE_KEYS.ENTRIES) || {};
+    return entries[date] || null;
+  }
+
+  async saveEntry(entry: JournalEntry): Promise<void> {
+    const entries = this.getFromStorage<Record<string, JournalEntry>>(this.STORAGE_KEYS.ENTRIES) || {};
+    entries[entry.date] = entry;
+    this.saveToStorage(this.STORAGE_KEYS.ENTRIES, entries);
   }
 
   async deleteEntry(date: string): Promise<void> {
-    try {
-      await puterService.deleteFile(`${this.ENTRIES_PATH}/${date}.json`);
-    } catch (error) {
-      console.error("Failed to delete entry:", error);
-      throw error;
-    }
+    const entries = this.getFromStorage<Record<string, JournalEntry>>(this.STORAGE_KEYS.ENTRIES) || {};
+    delete entries[date];
+    this.saveToStorage(this.STORAGE_KEYS.ENTRIES, entries);
   }
 
   async getAllEntries(): Promise<Record<string, JournalEntry>> {
-    try {
-      const files = await puterService.listFiles(this.ENTRIES_PATH);
-      const entries: Record<string, JournalEntry> = {};
-
-      for (const file of files) {
-        if (file.endsWith(".json")) {
-          const date = file.replace(".json", "");
-          const entry = await this.getEntry(date);
-          if (entry) {
-            entries[date] = entry;
-          }
-        }
-      }
-
-      return entries;
-    } catch (error) {
-      console.error("Failed to get all entries:", error);
-      return {};
-    }
+    return this.getFromStorage<Record<string, JournalEntry>>(this.STORAGE_KEYS.ENTRIES) || {};
   }
 
   // Meta Operations
   async getMeta(): Promise<JournalMeta | null> {
-    try {
-      return await puterService.readFile(this.META_PATH);
-    } catch (error) {
-      return null;
-    }
+    return this.getFromStorage<JournalMeta>(this.STORAGE_KEYS.META);
   }
 
   async saveMeta(meta: JournalMeta): Promise<void> {
-    try {
-      await puterService.writeFile(this.META_PATH, meta);
-    } catch (error) {
-      console.error("Failed to save meta:", error);
-      throw error;
-    }
+    this.saveToStorage(this.STORAGE_KEYS.META, meta);
   }
 
   // AI Thoughts Storage
-  async getAIThought(
-    date: string
-  ): Promise<{ thought: string; generatedAt: number } | null> {
-    try {
-      return await puterService.readFile(`${this.AI_PATH}/home/${date}.json`);
-    } catch (error) {
-      return null;
-    }
+  async getAIThought(date: string): Promise<{ thought: string; generatedAt: number } | null> {
+    const thoughts = this.getFromStorage<Record<string, { thought: string; generatedAt: number }>>(this.STORAGE_KEYS.AI_THOUGHTS) || {};
+    return thoughts[date] || null;
   }
 
   async saveAIThought(date: string, thought: string): Promise<void> {
-    try {
-      await puterService.writeFile(`${this.AI_PATH}/home/${date}.json`, {
-        date,
-        thought,
-        generatedAt: Date.now(),
-      });
-    } catch (error) {
-      console.error("Failed to save AI thought:", error);
-    }
+    const thoughts = this.getFromStorage<Record<string, { thought: string; generatedAt: number }>>(this.STORAGE_KEYS.AI_THOUGHTS) || {};
+    thoughts[date] = {
+      thought,
+      generatedAt: Date.now()
+    };
+    this.saveToStorage(this.STORAGE_KEYS.AI_THOUGHTS, thoughts);
   }
 
   async getWeeklySummary(week: number): Promise<any | null> {
-    try {
-      return await puterService.readFile(
-        `${this.AI_PATH}/weekly/week-${week}.json`
-      );
-    } catch (error) {
-      return null;
-    }
+    const summaries = this.getFromStorage<Record<number, any>>(this.STORAGE_KEYS.WEEKLY_SUMMARIES) || {};
+    return summaries[week] || null;
   }
 
   async saveWeeklySummary(week: number, summary: string): Promise<void> {
-    try {
-      await puterService.writeFile(`${this.AI_PATH}/weekly/week-${week}.json`, {
-        week,
-        summary,
-        generatedAt: Date.now(),
-      });
-    } catch (error) {
-      console.error("Failed to save weekly summary:", error);
-    }
+    const summaries = this.getFromStorage<Record<number, any>>(this.STORAGE_KEYS.WEEKLY_SUMMARIES) || {};
+    summaries[week] = {
+      week,
+      summary,
+      generatedAt: Date.now()
+    };
+    this.saveToStorage(this.STORAGE_KEYS.WEEKLY_SUMMARIES, summaries);
   }
 }
 

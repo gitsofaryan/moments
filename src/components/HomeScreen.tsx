@@ -70,7 +70,7 @@ export function HomeScreen({
           transition={{ delay: 0.2 }}
           className="mb-6"
         >
-          <AIThoughtCard recentEntries={recentEntries} />
+          <AIThoughtCard />
         </motion.div>
 
         {/* Today Status Card */}
@@ -93,15 +93,15 @@ export function HomeScreen({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-6 px-1">
               Recent days
             </h2>
-            <div className="space-y-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {recentEntries.map((entry, index) => (
                 <motion.div
                   key={entry.date}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.5 + index * 0.05 }}
                 >
                   <RecentEntryCard

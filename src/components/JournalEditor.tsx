@@ -16,8 +16,8 @@ interface JournalEditorProps {
   className?: string;
 }
 
-export function JournalEditor({ 
-  content, 
+export function JournalEditor({
+  content,
   placeholder = "What happened today?",
   isLocked = false,
   onChange,
@@ -32,7 +32,6 @@ export function JournalEditor({
           levels: [1, 2, 3]
         }
       }),
-      Underline,
       Image.configure({
         HTMLAttributes: {
           class: 'journal-image'
@@ -54,7 +53,7 @@ export function JournalEditor({
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
-      
+
       saveTimeoutRef.current = setTimeout(() => {
         onChange?.(editor.getHTML());
       }, 500);
@@ -112,14 +111,14 @@ export function JournalEditor({
   }
 
   return (
-    <motion.div 
+    <motion.div
       className={`relative ${className} ${isLocked ? 'entry-locked' : ''}`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
       {isLocked && (
-        <motion.div 
+        <motion.div
           className="absolute -top-3 right-0 flex items-center gap-1.5 text-journal-locked text-xs"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -129,13 +128,13 @@ export function JournalEditor({
           <span className="font-medium">This day is sealed</span>
         </motion.div>
       )}
-      
+
       <div className="bg-card/50 rounded-xl border border-border/30 overflow-hidden">
-        <EditorContent 
-          editor={editor} 
+        <EditorContent
+          editor={editor}
           className="px-4 py-5 sm:px-6 min-h-[250px] text-foreground leading-relaxed"
         />
-        
+
         {!isLocked && (
           <EditorToolbar editor={editor} onAddImage={addImage} />
         )}
