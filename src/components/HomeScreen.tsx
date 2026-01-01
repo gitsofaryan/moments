@@ -100,9 +100,14 @@ export function HomeScreen({
               {recentEntries.map((entry, index) => (
                 <motion.div
                   key={entry.date}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.5 + index * 0.05 }}
+                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{
+                    delay: 0.1 + index * 0.1,
+                    type: "spring",
+                    stiffness: 260,
+                    damping: 20
+                  }}
                 >
                   <RecentEntryCard
                     entry={entry}

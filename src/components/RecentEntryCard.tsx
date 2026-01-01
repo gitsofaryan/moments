@@ -16,8 +16,10 @@ export function RecentEntryCard({ entry, onClick }: RecentEntryCardProps) {
     <motion.button
       type="button"
       onClick={onClick}
-      className="floating-card active:scale-95 transition-all duration-300 w-full aspect-square p-5 flex flex-col justify-between group hover:border-white/20 hover:shadow-glow"
-      whileTap={{ scale: 0.95 }}
+      className="floating-card transition-all duration-300 w-full aspect-square p-5 flex flex-col justify-between group hover:border-white/20 hover:shadow-glow hover:-translate-y-1"
+      whileTap={{ scale: 0.9 }}
+      whileHover={{ scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
     >
       <div className="flex justify-between items-start w-full">
         <span className="text-xl font-display font-bold text-white/90 group-hover:text-primary transition-colors">

@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { DustText } from './DustText';
 import { aiService } from '@/services/ai';
 import { getTodayString } from '@/lib/dateUtils';
 import { useJournal } from '@/hooks/useJournal';
@@ -76,7 +77,7 @@ export function AIThoughtCard() {
           </div>
         ) : (
           <p className="font-display text-xl leading-relaxed text-foreground">
-            "{thought}"
+            <DustText text={`"${thought}"`} key={thought} />
           </p>
         )}
       </div>
