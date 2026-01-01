@@ -107,38 +107,29 @@ export function HomeScreen({
             transition={{ delay: 0.4 }}
           >
             <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-6 px-1">
-              Recent days
+              Stats
             </h2>
-            <div className="grid grid-cols-2 gap-3 auto-rows-[160px]">
-              {recentEntries.map((entry, index) => {
-                // Irregular pattern: 1st is wide, then 2 squares, then wide...
-                // index 0 -> span 2
-                // index 1 -> span 1
-                // index 2 -> span 1
-                // index 3 -> span 2
-                const isWide = index % 3 === 0;
-
-                return (
-                  <motion.div
-                    key={entry.date}
-                    className={isWide ? "col-span-2" : "col-span-1"}
-                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{
-                      delay: 0.1 + index * 0.1,
-                      type: "spring",
-                      stiffness: 260,
-                      damping: 20
-                    }}
-                  >
-                    <RecentEntryCard
-                      entry={entry}
-                      onClick={() => onViewEntry(entry.date)}
-                      className="h-full"
-                    />
-                  </motion.div>
-                );
-              })}
+            <div className="columns-2 gap-4 space-y-4">
+              {recentEntries.map((entry, index) => (
+                <motion.div
+                  key={entry.date}
+                  className="break-inside-avoid"
+                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{
+                    delay: 0.1 + index * 0.1,
+                    type: "spring",
+                    stiffness: 260,
+                    damping: 20
+                  }}
+                >
+                  <RecentEntryCard
+                    entry={entry}
+                    onClick={() => onViewEntry(entry.date)}
+                    className={index % 3 === 0 ? "min-h-[160px]" : "min-h-[120px]"}
+                  />
+                </motion.div>
+              ))}
             </div>
           </motion.section>
         )}
