@@ -16,21 +16,28 @@ class AIService {
       .join("\n\n");
 
     const prompt = `
-You are a sarcastic, dry-witted observer of my life.
+You are an observant AI system.
+Based on the most recent journal entry, extract the key sentiment and theme.
 
-Based on the following journal text, write ONE short, witty, slightly roasty comment.
-Don't be mean, just dry and funny.
-Poke fun at my patterns or complaints to make me laugh.
-
-Journal:
+Data:
 ${recentEntriesText}
 
-Output only one short sentence.`;
+Strict Rules:
+- NEVER give advice
+- NEVER judge behavior
+- NEVER diagnose emotions
+- NEVER motivate
+- DO NOT act like a therapist or coach
+- JUST OBSERVE and REFLECT
+
+Output:
+ONE short, observational sentence describing the sentiment or theme found.
+`;
 
     try {
       const thought = await puterService.chat(prompt, {
         model: "grok-4-fast",
-        temperature: 0.6,
+        temperature: 0.5,
         max_tokens: 60,
       });
 
@@ -52,19 +59,25 @@ Output only one short sentence.`;
       .join("\n\n");
 
     const prompt = `
-You are analyzing a week's worth of personal journal entries.
+You are an observant AI system analyzing a week of journal entries.
 
-Write a short narrative summary.
-Do not give advice.
-Do not judge.
-Do not suggest actions.
+Goal:
+Detect patterns and create a narrative summary (not statistics).
 
-Just describe patterns, tone shifts, or recurring themes.
-
-Entries:
+Data:
 ${entriesText}
 
-Output 2-3 sentences.`;
+Strict Rules:
+- NEVER give advice
+- NEVER judge behavior
+- NEVER diagnose emotions
+- NEVER motivate
+- DO NOT act like a therapist or coach
+- JUST OBSERVE and REFLECT
+
+Output:
+2-3 sentences summarizing the narrative arc and patterns.
+`;
 
     try {
       const summary = await puterService.chat(prompt, {
@@ -83,7 +96,7 @@ Output 2-3 sentences.`;
   // Generate monthly reflection
   async generateMonthlyReflection(entries: JournalEntry[]): Promise<string> {
     const entriesText = entries
-      .slice(0, 30) // Take first 30 for context
+      .slice(0, 30)
       .map(
         (entry) =>
           `${entry.title}: ${entry.contentHtml
@@ -93,19 +106,25 @@ Output 2-3 sentences.`;
       .join("\n");
 
     const prompt = `
-You are reflecting on a month of journal entries.
+You are an observant AI system reflecting on a month of entries.
 
-Identify the main themes and emotional patterns.
-Do not give advice.
-Do not judge.
-Do not analyze deeply.
+Goal:
+Identify emotional trends and evolution in language.
 
-Just observe what emerged this month.
-
-Entries:
+Data:
 ${entriesText}
 
-Output 3-4 sentences.`;
+Strict Rules:
+- NEVER give advice
+- NEVER judge behavior
+- NEVER diagnose emotions
+- NEVER motivate
+- DO NOT act like a therapist or coach
+- JUST OBSERVE and REFLECT
+
+Output:
+3-4 sentences describing the evolution and trends.
+`;
 
     try {
       const reflection = await puterService.chat(prompt, {
@@ -121,12 +140,65 @@ Output 3-4 sentences.`;
     }
   }
 
+  // Generate full narrative arc (Yearly)
+  async generateYearlyReflection(entries: JournalEntry[]): Promise<string> {
+      // Logic for yearly (potentially large context, might need summarization strategy later)
+      // For now, sampling
+      const entriesText = entries
+      .filter((_, i) => i % 5 === 0) // Sample every 5th entry to fit context
+      .map(
+        (entry) =>
+          `${entry.title}: ${entry.contentHtml
+            .replace(/<[^>]*>/g, " ")
+            .slice(0, 100)}`
+      )
+      .join("\n");
+      
+      const prompt = `
+You are an observant AI system analyzing a year of entries.
+
+Goal:
+Describe the full narrative arc and compare "You at the beginning vs now".
+
+Data:
+${entriesText}
+
+Strict Rules:
+- NEVER give advice
+- NEVER judge behavior
+- NEVER diagnose emotions
+- NEVER motivate
+- DO NOT act like a therapist or coach
+- JUST OBSERVE and REFLECT
+
+Output:
+A concise paragraph describing the arc.
+`;
+
+      try {
+      const reflection = await puterService.chat(prompt, {
+        model: "grok-4-fast", // Using fast model for larger context handling might need care
+        temperature: 0.5,
+        max_tokens: 300,
+      });
+
+      return reflection;
+    } catch (error) {
+      console.error("Failed to generate yearly reflection:", error);
+      return "A year of growth.";
+    }
+  }
+
   // Generate gentle notification thought
   async generateNotificationThought(): Promise<string> {
     const prompt = `
-Write one short, sarcastic notification to get my attention.
-Be dry. Be witty.
-Maybe imply I'm procrastinating or forgetting something.
+You are an observant AI system.
+Write a short notification to prompt reflection.
+
+Strict Rules:
+- NEVER give advice
+- NEVER judge
+- Be observational
 
 Output one short sentence.`;
 
@@ -139,7 +211,7 @@ Output one short sentence.`;
 
       return thought;
     } catch (error) {
-      return "You haven't said anything about today yet.";
+      return "A moment to reflect.";
     }
   }
 
@@ -182,6 +254,34 @@ Output one short sentence.`;
       return thought;
     }
     return "Your journey begins today.";
+  }
+  // Transform text for Editor AI features
+  async transformText(text: string, instruction: string = "Improve clarity and flow"): Promise<string> {
+    const prompt = `
+You are an expert editor.
+Task: ${instruction}
+
+Input Text:
+"${text}"
+
+Rules:
+- Return ONLY the transformed text.
+- Do not add explanations or quotes.
+- Maintain the original voice but enhance according to instruction.
+`;
+
+    try {
+      const result = await puterService.chat(prompt, {
+        model: "grok-4-fast",
+        temperature: 0.3, 
+        max_tokens: 500,
+      });
+      return result.trim();
+    } catch (error) {
+      console.error("Failed to transform text:", error);
+      toast.error("AI Transform failed.");
+      return text; // Return original on fail
+    }
   }
 }
 

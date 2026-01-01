@@ -1,20 +1,21 @@
 import { Editor } from '@tiptap/react';
 import { motion } from 'framer-motion';
-import { 
-  Bold, 
-  Italic, 
-  Underline, 
-  Heading1, 
-  Heading2, 
-  ImageIcon 
+import {
+  Bold,
+  Italic,
+  Underline,
+  Heading1,
+  Heading2,
+  ImageIcon
 } from 'lucide-react';
 
 interface EditorToolbarProps {
   editor: Editor;
   onAddImage: () => void;
+  minimal?: boolean;
 }
 
-export function EditorToolbar({ editor, onAddImage }: EditorToolbarProps) {
+export function EditorToolbar({ editor, onAddImage, minimal = false }: EditorToolbarProps) {
   const tools = [
     {
       icon: Bold,
@@ -55,29 +56,30 @@ export function EditorToolbar({ editor, onAddImage }: EditorToolbarProps) {
   ];
 
   return (
-    <motion.div 
-      className="flex items-center gap-1 px-4 py-3 border-t border-border/30 bg-muted/30 safe-bottom"
+    <motion.div
+      className="flex items-center gap-2 px-3 py-2 bg-card border border-border/50 rounded-full shadow-lg"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
     >
       {tools.map((tool, index) => {
         const Icon = tool.icon;
+
         return (
           <motion.button
             key={tool.label}
             type="button"
             onClick={tool.action}
             className={`
-              p-2.5 rounded-lg transition-all duration-200 touch-manipulation
-              ${tool.isActive 
-                ? 'bg-primary/20 text-primary' 
+              p-2 rounded-full transition-all duration-200 touch-manipulation
+              ${tool.isActive
+                ? 'bg-primary text-primary-foreground'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               }
             `}
             whileTap={{ scale: 0.95 }}
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: index * 0.05 }}
             aria-label={tool.label}
           >

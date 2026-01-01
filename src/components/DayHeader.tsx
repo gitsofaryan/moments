@@ -28,7 +28,12 @@ export function DayHeader({
 
     const updateTime = () => {
       const remaining = getTimeUntilLock(createdAt);
-      setTimeRemaining(formatTimeRemaining(remaining));
+      // Only show countdown if less than 4 hours remaining to avoid "23h" stress
+      if (remaining < 4 * 60 * 60 * 1000) {
+        setTimeRemaining(formatTimeRemaining(remaining));
+      } else {
+        setTimeRemaining('');
+      }
     };
 
     updateTime();

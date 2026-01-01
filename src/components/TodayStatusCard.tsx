@@ -57,27 +57,27 @@ export function TodayStatusCard({ entry, onWriteClick }: TodayStatusCardProps) {
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             <span className="text-xs font-medium text-primary">Today's entry</span>
-            {!isLocked && timeRemaining > 0 && (
+            {!isLocked && timeRemaining > 0 && timeRemaining < 14400000 && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="w-3 h-3" />
                 {formatTimeRemaining(timeRemaining)}
               </span>
             )}
           </div>
-          
+
           {entry.title && (
             <h3 className="font-display text-lg text-foreground mb-1 truncate">
               {entry.title}
             </h3>
           )}
-          
+
           {previewText && (
             <p className="text-sm text-muted-foreground line-clamp-2">
               {previewText}...
             </p>
           )}
         </div>
-        
+
         <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0 mt-1" />
       </div>
     </motion.button>
