@@ -1,4 +1,4 @@
-import { useEditor, EditorContent, BubbleMenu, FloatingMenu } from '@tiptap/react';
+import { useEditor, EditorContent, BubbleMenu, FloatingMenu, Extension } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -29,12 +29,27 @@ export function JournalEditor({
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const [isAiLoading, setIsAiLoading] = useState(false);
 
+
+
+  // ... imports
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         heading: {
           levels: [1, 2, 3]
-        }
+        },
+      }),
+      // Force Select All support
+      Extension.create({
+        name: 'selectAll',
+        addKeyboardShortcuts() {
+          return {
+            'Mod-a': () => {
+              return this.editor.commands.selectAll();
+            },
+          };
+        },
       }),
       Image.configure({
         HTMLAttributes: {

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { AuthWrapper } from "./components/AuthWrapper";
+import { InstallPrompt } from "./components/InstallPrompt";
 
 const queryClient = new QueryClient();
 
@@ -13,7 +14,8 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
-      <Toaster />
+      <Sonner />
+      <InstallPrompt />
       <AuthWrapper>
         <BrowserRouter
           future={{

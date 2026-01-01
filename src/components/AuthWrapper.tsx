@@ -45,7 +45,7 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
 
     if (isChecking) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-background">
+            <div className="min-h-[100dvh] flex items-center justify-center bg-background">
                 <div className="flex flex-col items-center gap-4">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     <p className="text-muted-foreground animate-pulse">Connecting to Puter...</p>
@@ -56,7 +56,7 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
 
     if (!isAuthenticated) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-background p-4">
+            <div className="min-h-[100dvh] flex items-center justify-center bg-background p-4">
                 <div className="glass-card max-w-md w-full p-8 space-y-6 rounded-3xl">
                     <div className="text-center space-y-2">
                         <h1 className="text-2xl font-display font-bold">Welcome Back</h1>
