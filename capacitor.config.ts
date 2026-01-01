@@ -10,6 +10,14 @@ const config: CapacitorConfig = {
       readyTimeout: 10000,
       resetWhenUpdate: false
     }
+  },
+  server: {
+    androidScheme: 'https',
+    hostname: 'com.moments.app',
+    allowNavigation: [
+      '*.puter.com',
+      '*.puter.site'
+    ]
   }
 };
 
