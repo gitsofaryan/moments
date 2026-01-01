@@ -257,7 +257,7 @@ export function JournalEditor({
         {/* Editor Area */}
         <EditorContent
           editor={editor}
-          className="flex-1 px-4 py-4 min-h-[400px] text-foreground leading-relaxed text-xl focus:outline-none"
+          className="flex-1 px-4 py-4 min-h-[400px] text-foreground leading-relaxed text-xl font-display focus:outline-none"
         />
       </div>
     </motion.div>

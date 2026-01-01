@@ -8,9 +8,9 @@ interface TitleInputProps {
   placeholder?: string;
 }
 
-export function TitleInput({ 
-  value, 
-  onChange, 
+export function TitleInput({
+  value,
+  onChange,
   isLocked = false,
   placeholder = "Today's title..."
 }: TitleInputProps) {
@@ -24,11 +24,11 @@ export function TitleInput({
 
   const handleChange = (newValue: string) => {
     setLocalValue(newValue);
-    
+
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
-    
+
     saveTimeoutRef.current = setTimeout(() => {
       onChange(newValue);
     }, 500);
@@ -57,8 +57,8 @@ export function TitleInput({
         placeholder={placeholder}
         className={`
           w-full bg-transparent border-none outline-none
-          font-display text-2xl sm:text-3xl font-medium
-          text-foreground placeholder:text-muted-foreground/50
+          font-display text-4xl sm:text-5xl font-bold tracking-tight
+          text-foreground placeholder:text-muted-foreground/30
           transition-opacity duration-300
           ${isLocked ? 'opacity-70 cursor-not-allowed' : ''}
         `}
