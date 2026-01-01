@@ -129,10 +129,10 @@ export function JournalEditor({
         </motion.div>
       )}
 
-      <div className="bg-card/50 rounded-xl border border-border/30 overflow-hidden">
+      <div className="glass-card rounded-3xl overflow-hidden min-h-[400px] flex flex-col justify-between">
         <EditorContent
           editor={editor}
-          className="px-4 py-5 sm:px-6 min-h-[250px] text-foreground leading-relaxed"
+          className="px-6 py-6 min-h-[300px] text-foreground leading-relaxed text-lg"
         />
 
         {!isLocked && (

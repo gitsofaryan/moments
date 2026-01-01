@@ -11,9 +11,9 @@ interface DayHeaderProps {
   createdAt?: number;
 }
 
-export function DayHeader({ 
-  date, 
-  dayIndex, 
+export function DayHeader({
+  date,
+  dayIndex,
   totalDays = 365,
   isLocked,
   createdAt
@@ -38,23 +38,23 @@ export function DayHeader({
   }, [createdAt, isLocked]);
 
   return (
-    <motion.header 
+    <motion.header
       className="mb-8"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <motion.p 
-        className="text-sm font-medium text-primary mb-1 tracking-wide uppercase"
+      <motion.p
+        className="text-sm font-medium text-primary mb-1 tracking-wide uppercase text-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
         Day {dayIndex} of {totalDays}
       </motion.p>
-      
-      <motion.h1 
-        className="font-display text-4xl sm:text-5xl font-semibold text-foreground tracking-tight"
+
+      <motion.h1
+        className="font-display text-4xl sm:text-5xl font-semibold text-foreground tracking-tight text-center"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
@@ -63,7 +63,7 @@ export function DayHeader({
       </motion.h1>
 
       {(timeRemaining || isLocked) && (
-        <motion.div 
+        <motion.div
           className="mt-3 flex items-center gap-2 text-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

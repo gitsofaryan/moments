@@ -21,6 +21,8 @@ export function AIThoughtCard() {
 
       try {
         const insight = await aiService.ensureTodayThought(getTodayString(), recentEntries);
+        // Artificial delay for effect
+        await new Promise(resolve => setTimeout(resolve, 1500));
         setThought(insight);
       } catch (error) {
         console.error('Failed to load AI thought:', error);
@@ -60,23 +62,20 @@ export function AIThoughtCard() {
         }}
       />
 
-      <div className="relative z-10">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="p-1.5 rounded-lg bg-primary/15">
-            <Sparkles className="w-4 h-4 text-primary" />
+      <div className="relative z-10 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="p-1.5 rounded-lg bg-primary/10">
+            <Sparkles className="w-3.5 h-3.5 text-primary" />
           </div>
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            Today's reflection
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider sm:hidden">
+            Perspective
           </span>
         </div>
 
         {isLoading ? (
-          <div className="space-y-2">
-            <div className="h-6 w-3/4 bg-muted/50 rounded animate-pulse" />
-            <div className="h-6 w-1/2 bg-muted/50 rounded animate-pulse" />
-          </div>
+          <div className="h-5 w-3/4 bg-muted/50 rounded animate-pulse" />
         ) : (
-          <p className="font-display text-xl leading-relaxed text-foreground">
+          <p className="font-display text-base leading-snug text-foreground/90">
             <DustText text={`"${thought}"`} key={thought} />
           </p>
         )}

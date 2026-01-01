@@ -57,7 +57,7 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
     if (!isAuthenticated) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background p-4">
-                <Card className="max-w-md w-full p-8 space-y-6 bg-card border-border/50">
+                <div className="glass-card max-w-md w-full p-8 space-y-6 rounded-3xl">
                     <div className="text-center space-y-2">
                         <h1 className="text-2xl font-display font-bold">Welcome Back</h1>
                         <p className="text-muted-foreground">
@@ -67,7 +67,7 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
 
                     <Button
                         onClick={handleSignIn}
-                        className="w-full h-12 text-lg font-medium"
+                        className="w-full h-12 text-lg font-medium rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all font-display"
                         size="lg"
                     >
                         Sign in with Puter
@@ -77,7 +77,7 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
                         Your journal entries are stored locally on this device.
                         Puter is used for AI generation.
                     </p>
-                </Card>
+                </div>
             </div>
         );
     }

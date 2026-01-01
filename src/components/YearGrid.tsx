@@ -50,8 +50,9 @@ export function YearGrid({ days, onDayClick }: YearGridProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: groupIndex * 0.05 }}
+          className="bg-card/30 p-6 rounded-3xl border border-white/5"
         >
-          <h3 className="font-display text-lg text-muted-foreground mb-4">
+          <h3 className="font-display text-lg text-muted-foreground mb-4 pl-1">
             {group.month}
           </h3>
 
@@ -105,11 +106,11 @@ function YearDot({ day, onClick, delay }: YearDotProps) {
       transition={{
         delay,
         type: 'spring',
-        stiffness: 400,
-        damping: 25,
+        stiffness: 260,
+        damping: 20,
       }}
-      whileHover={!day.isFuture ? { scale: 1.3 } : undefined}
-      whileTap={!day.isFuture ? { scale: 0.9 } : undefined}
+      whileHover={!day.isFuture ? { scale: 1.4 } : undefined}
+      whileTap={!day.isFuture ? { scale: 0.8 } : undefined}
       aria-label={`Day ${day.dayIndex}: ${day.date}`}
     />
   );

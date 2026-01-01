@@ -8,7 +8,7 @@ interface RecentEntryCardProps {
   onClick: () => void;
 }
 
-export function RecentEntryCard({ entry, onClick }: RecentEntryCardProps) {
+export function RecentEntryCard({ entry, onClick, className = "" }: RecentEntryCardProps & { className?: string }) {
   const isLocked = isEntryLocked(entry.createdAt);
   const displayDate = formatDisplayDate(entry.date);
 
@@ -16,8 +16,8 @@ export function RecentEntryCard({ entry, onClick }: RecentEntryCardProps) {
     <motion.button
       type="button"
       onClick={onClick}
-      className="floating-card transition-all duration-300 w-full aspect-square p-5 flex flex-col justify-between group hover:border-white/20 hover:shadow-glow hover:-translate-y-1"
-      whileTap={{ scale: 0.9 }}
+      className={`floating-card transition-all duration-300 w-full p-5 flex flex-col justify-between group hover:border-white/20 hover:shadow-glow hover:-translate-y-1 ${className}`}
+      whileTap={{ scale: 0.95 }}
       whileHover={{ scale: 1.02 }}
       transition={{ type: "spring", stiffness: 400, damping: 17 }}
     >

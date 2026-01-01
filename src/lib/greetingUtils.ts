@@ -1,5 +1,5 @@
-export function getTimeBasedGreeting(): string {
-  const hour = new Date().getHours();
+export function getTimeBasedGreeting(date: Date = new Date()): string {
+  const hour = date.getHours();
   
   if (hour >= 5 && hour < 12) {
     return 'Good morning';
@@ -12,8 +12,8 @@ export function getTimeBasedGreeting(): string {
   }
 }
 
-export function getSubtleGreeting(): string {
-  const hour = new Date().getHours();
+export function getSubtleGreeting(date: Date = new Date()): string {
+  const hour = date.getHours();
   
   if (hour >= 5 && hour < 12) {
     return 'A new day begins';

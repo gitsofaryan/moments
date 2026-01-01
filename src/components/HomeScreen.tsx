@@ -7,6 +7,8 @@ import { AIThoughtCard } from './AIThoughtCard';
 import { TodayStatusCard } from './TodayStatusCard';
 import { RecentEntryCard } from './RecentEntryCard';
 
+import { useCurrentTime } from '@/hooks/useCurrentTime';
+
 interface HomeScreenProps {
   meta: JournalMeta | null;
   todayEntry: JournalEntry | null;
@@ -22,21 +24,24 @@ export function HomeScreen({
   onNavigateToWrite,
   onViewEntry,
 }: HomeScreenProps) {
-  const greeting = getTimeBasedGreeting();
-  const today = getTodayString();
-  const displayDate = formatDisplayDate(today);
+  const now = useCurrentTime(); // updates every minute
+  const greeting = getTimeBasedGreeting(now);
+  const todayString = formatDate(now);
+  const displayDate = now.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+  const displayTime = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
   const dayIndex = meta ? Math.min(
-    Math.floor((Date.now() - parseDate(meta.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1,
+    Math.floor((now.getTime() - parseDate(meta.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1,
     365
   ) : 1;
 
   return (
     <motion.div
       className="min-h-screen pb-28 safe-top"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.4 }}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 1.05 }}
+      transition={{ type: 'spring', stiffness: 260, damping: 20 }}
     >
       {/* Ambient glow */}
       <div
@@ -54,7 +59,10 @@ export function HomeScreen({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <p className="text-muted-foreground text-sm mb-1">{displayDate}</p>
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-muted-foreground text-sm">{displayDate}</p>
+            <p className="text-muted-foreground text-sm font-medium bg-primary/10 px-2 py-0.5 rounded-full">{displayTime}</p>
+          </div>
           <h1 className="font-display text-4xl font-semibold text-foreground mb-1">
             {greeting}
           </h1>
@@ -96,25 +104,36 @@ export function HomeScreen({
             <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-6 px-1">
               Recent days
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {recentEntries.map((entry, index) => (
-                <motion.div
-                  key={entry.date}
-                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{
-                    delay: 0.1 + index * 0.1,
-                    type: "spring",
-                    stiffness: 260,
-                    damping: 20
-                  }}
-                >
-                  <RecentEntryCard
-                    entry={entry}
-                    onClick={() => onViewEntry(entry.date)}
-                  />
-                </motion.div>
-              ))}
+            <div className="grid grid-cols-2 gap-3 auto-rows-[160px]">
+              {recentEntries.map((entry, index) => {
+                // Irregular pattern: 1st is wide, then 2 squares, then wide...
+                // index 0 -> span 2
+                // index 1 -> span 1
+                // index 2 -> span 1
+                // index 3 -> span 2
+                const isWide = index % 3 === 0;
+
+                return (
+                  <motion.div
+                    key={entry.date}
+                    className={isWide ? "col-span-2" : "col-span-1"}
+                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{
+                      delay: 0.1 + index * 0.1,
+                      type: "spring",
+                      stiffness: 260,
+                      damping: 20
+                    }}
+                  >
+                    <RecentEntryCard
+                      entry={entry}
+                      onClick={() => onViewEntry(entry.date)}
+                      className="h-full"
+                    />
+                  </motion.div>
+                );
+              })}
             </div>
           </motion.section>
         )}

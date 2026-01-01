@@ -3,17 +3,16 @@ import { motion } from 'framer-motion';
 interface DustTextProps {
     text: string;
     className?: string;
-    key?: string | number; // To trigger re-animation on change
 }
 
-export function DustText({ text, className = "", key }: DustTextProps) {
+export function DustText({ text, className = "" }: DustTextProps) {
     // Split text into words first to handle spacing correctly, then chars? 
     // Or just chars. Splitting into words and then chars is safer for layout.
 
     const characters = text.split("");
 
     return (
-        <span className={`inline-block whitespace-pre-wrap ${className}`} key={key}>
+        <span className={`inline-block whitespace-pre-wrap ${className}`}>
             {characters.map((char, i) => (
                 <motion.span
                     key={i}

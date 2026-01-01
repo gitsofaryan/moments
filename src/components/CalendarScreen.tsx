@@ -15,10 +15,10 @@ export function CalendarScreen({ days, meta, onDayClick }: CalendarScreenProps) 
   return (
     <motion.div
       className="min-h-screen pb-28 safe-top"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 1.05 }}
+      transition={{ type: 'spring', stiffness: 260, damping: 20 }}
     >
       {/* Ambient glow */}
       <div
