@@ -107,7 +107,7 @@ export function HomeScreen({
             transition={{ delay: 0.4 }}
           >
             <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-6 px-1">
-              Stats
+              Recent Moments
             </h2>
             <div className="columns-2 gap-4 space-y-4">
               {recentEntries.map((entry, index) => (

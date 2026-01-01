@@ -55,7 +55,7 @@ export function YearGrid({ days, onDayClick }: YearGridProps) {
           <h3 className="font-display text-2xl font-medium text-foreground mb-4 pl-1 flex items-center justify-between">
             <span>{group.month}</span>
             <span className="text-xs font-sans text-muted-foreground bg-primary/10 px-2 py-1 rounded-full">
-              {group.days.filter(d => d.hasEntry).length} entries
+              {group.days.filter(d => d.hasEntry).length} moments
             </span>
           </h3>
 
