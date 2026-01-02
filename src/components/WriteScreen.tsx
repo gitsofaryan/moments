@@ -208,18 +208,21 @@ export function WriteScreen({
       {/* Header Actions Row */}
       <div className="absolute top-4 right-5 z-20 flex items-center gap-2">
         {/* Save Status Indicator */}
-        <div className="mr-2 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/50 backdrop-blur-sm border border-white/10 shadow-sm pointer-events-none">
-          {saveStatus === 'saving' ? (
-            <>
-              <Loader2 className="w-3 h-3 text-muted-foreground animate-spin" />
-              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Saving</span>
-            </>
-          ) : (
-            <>
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
-              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Saved</span>
-            </>
-          )}
+        {/* Save Status Indicator - Distraction Free */}
+        <div className="flex items-center justify-center w-8 h-8 pointer-events-none">
+          <AnimatePresence mode="wait">
+            {saveStatus === 'saving' && (
+              <motion.div
+                key="saving"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Loader2 className="w-4 h-4 text-muted-foreground/50 animate-spin" />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* AI Title Button */}
