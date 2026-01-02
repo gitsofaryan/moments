@@ -38,8 +38,8 @@ export const notificationService = {
         navigator.serviceWorker.ready.then(registration => {
           registration.showNotification(title, {
             body,
-            icon: '/icon.svg',
-            badge: '/icon.svg',
+            icon: '/android-chrome-192x192.png',
+            badge: '/android-chrome-192x192.png',
             vibrate: [200, 100, 200]
           } as any);
         });
@@ -47,7 +47,7 @@ export const notificationService = {
         // Fallback to standard API
         new Notification(title, {
           body,
-          icon: '/icon.svg'
+          icon: '/android-chrome-192x192.png'
         });
       }
     } catch (e) {

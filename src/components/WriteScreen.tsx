@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Share2, Loader2 } from 'lucide-react';
-import html2canvas from 'html2canvas'; // Import library
+import { Share2, Loader2, Sparkles } from 'lucide-react';
+import html2canvas from 'html2canvas';
 import { toast } from 'sonner';
 
 import { TitleInput } from './TitleInput';
 import { JournalEditor } from './JournalEditor';
-import { ShareCard } from './ShareCard'; // Import component
+import { ShareCard } from './ShareCard';
 import { JournalEntry } from '@/types/journal';
 import { isEntryLocked } from '@/lib/dateUtils';
-import { aiService } from '@/services/ai'; // Import AI
+import { aiService } from '@/services/ai';
 
 interface WriteScreenProps {
   date: string;
@@ -33,6 +33,12 @@ export function WriteScreen({
   const shareCardRef = useRef<HTMLDivElement>(null);
   const [shareData, setShareData] = useState<{ entry: JournalEntry; observation: string } | null>(null);
 
+  const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
+
+  // Save Status Logic
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
+  const lastSaveTimeRef = useRef<number>(Date.now());
+
   // Calculate character count (approximate, stripping HTML)
   const charCount = content.replace(/<[^>]*>/g, '').length;
 
@@ -42,9 +48,21 @@ export function WriteScreen({
     setContent(entry?.contentHtml || '');
   }, [entry]);
 
+  // Reset status to 'saved' after a delay
+  useEffect(() => {
+    if (saveStatus === 'saving') {
+      const timer = setTimeout(() => {
+        setSaveStatus('saved');
+        lastSaveTimeRef.current = Date.now();
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [saveStatus]);
+
   const handleTitleChange = useCallback(
     (newTitle: string) => {
       setTitle(newTitle);
+      setSaveStatus('saving');
       if (!isLocked) {
         onSave(date, newTitle, content);
       }
@@ -55,12 +73,40 @@ export function WriteScreen({
   const handleContentChange = useCallback(
     (newContent: string) => {
       setContent(newContent);
+      setSaveStatus('saving');
       if (!isLocked) {
         onSave(date, title, newContent);
       }
     },
     [date, title, isLocked, onSave]
   );
+
+  const handleGenerateTitle = async () => {
+    if (!content || content.length < 10) {
+      toast.info("Write a bit more content first!");
+      return;
+    }
+
+    setIsGeneratingTitle(true);
+    try {
+      const newTitle = await aiService.generateTitle(content);
+      if (newTitle) {
+        setTitle(newTitle);
+        setSaveStatus('saving');
+        // Trigger save immediately
+        if (!isLocked) {
+          onSave(date, newTitle, content);
+        }
+        toast.success("Title generated!");
+      } else {
+        toast.error("Could not generate title.");
+      }
+    } catch {
+      toast.error("AI error.");
+    } finally {
+      setIsGeneratingTitle(false);
+    }
+  };
 
   const handleShare = async () => {
     if (!entry || (!entry.title && !entry.contentHtml)) {
@@ -108,25 +154,20 @@ export function WriteScreen({
               shared = true;
             } catch (err) {
               console.warn("Share cancelled or failed", err);
-              // User might have cancelled, but if it failed technically, run fallback?
-              // Usually cancellation shouldn't trigger download, but failure should.
-              // We'll proceed to fallback if it wasn't a user cancellation (hard to detect reliably cross-browser, but we'll assume manual backup is good).
             }
           }
 
           if (!shared) {
             // 6. Desktop Fallback: Copy to Clipboard + Download
             try {
-              // Try copying to clipboard (great for pasting into WhatsApp Web/Discord)
               const clipboardItem = new ClipboardItem({ 'image/png': blob });
               await navigator.clipboard.write([clipboardItem]);
-              toast.success("I've copied the image to your clipboard!");
+              toast.success("Copied to clipboard!");
             } catch (e) {
-              // Clipboard might fail if not focused or permission denied
               console.warn("Clipboard failed", e);
             }
 
-            // Always offer download on desktop as reliable backup
+            // Always offer download on desktop
             downloadImage(canvas.toDataURL());
             if (!navigator.clipboard) {
               toast.success("Image saved to your device!");
@@ -145,12 +186,12 @@ export function WriteScreen({
 
   const downloadImage = (dataUrl: string) => {
     const link = document.createElement('a');
-    link.download = `moment-${date}.png`;
+    link.download = `moment - ${date}.png`;
     link.href = dataUrl;
     link.click();
   };
 
-  // Format date for meta line (e.g., "23 December 2025")
+  // Format date for meta line
   const formatDateMeta = (dateStr: string) => {
     const d = new Date(dateStr);
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -158,14 +199,42 @@ export function WriteScreen({
 
   return (
     <motion.div
-      className="min-h-screen pb-28 safe-top bg-background" // Ensure bg color
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 1.05 }}
-      transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+      className="min-h-screen pb-28 safe-top bg-background"
+      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -10, scale: 1.02 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
     >
-      {/* Header Actions */}
-      <div className="absolute top-4 right-5 z-20">
+      {/* Header Actions Row */}
+      <div className="absolute top-4 right-5 z-20 flex items-center gap-2">
+        {/* Save Status Indicator */}
+        <div className="mr-2 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/50 backdrop-blur-sm border border-white/10 shadow-sm pointer-events-none">
+          {saveStatus === 'saving' ? (
+            <>
+              <Loader2 className="w-3 h-3 text-muted-foreground animate-spin" />
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Saving</span>
+            </>
+          ) : (
+            <>
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Saved</span>
+            </>
+          )}
+        </div>
+
+        {/* AI Title Button */}
+        {!isLocked && (
+          <button
+            onClick={handleGenerateTitle}
+            disabled={isGeneratingTitle}
+            className="p-2 rounded-full bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-purple-400 transition-colors"
+            title="Auto-generate Title"
+          >
+            {isGeneratingTitle ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+          </button>
+        )}
+
+        {/* Share Button */}
         <button
           onClick={handleShare}
           disabled={isSharing}
@@ -187,7 +256,7 @@ export function WriteScreen({
         )}
       </div>
 
-      {/* Ambient glow - slightly reduced opacity for cleaner read */}
+      {/* Ambient glow */}
       <div
         className="fixed top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] pointer-events-none opacity-20"
         style={{
@@ -203,7 +272,7 @@ export function WriteScreen({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
-            className="space-y-4" // Tighter spacing for title/meta
+            className="space-y-4"
           >
             <TitleInput
               value={title}
@@ -213,7 +282,7 @@ export function WriteScreen({
               content={content}
             />
 
-            {/* Metadata (Char count, time) */}
+            {/* Metadata */}
             <div className="text-xs text-muted-foreground/60 font-body flex items-center gap-3 border-l-2 border-primary/20 pl-3 ml-1 mb-6">
               <span>{formatDateMeta(date)}</span>
               <span className="w-1 h-1 rounded-full bg-border" />
@@ -234,18 +303,6 @@ export function WriteScreen({
               isLocked={isLocked}
               placeholder="Start writing..."
             />
-
-            {/* Auto-save indicator */}
-            {!isLocked && (title || content) && (
-              <motion.p
-                className="fixed bottom-4 right-4 text-xs text-muted-foreground/40 pointer-events-none"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 2 }}
-              >
-                Saved
-              </motion.p>
-            )}
           </motion.div>
         </AnimatePresence>
       </div>

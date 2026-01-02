@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Lock, PenLine, Search, Settings, Sparkles, Loader2, Quote } from 'lucide-react';
+import { Bell, Lock, PenLine, Download, Settings, Sparkles, Loader2, Quote } from 'lucide-react';
 import { JournalEntry, JournalMeta } from '@/types/journal';
 import { formatDisplayDate, getTodayString, formatDate, parseDate, addDays } from '@/lib/dateUtils';
 import { getTimeBasedGreeting } from '@/lib/greetingUtils';
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 
 import { useCurrentTime } from '@/hooks/useCurrentTime';
+import { usePWAInstall } from '@/hooks/usePWAInstall';
 
 interface HomeScreenProps {
   meta: JournalMeta | null;
@@ -42,6 +43,7 @@ export function HomeScreen({
   const [isGuidanceOpen, setIsGuidanceOpen] = useState(false);
   const [isGeneratingGuidance, setIsGeneratingGuidance] = useState(false);
   const [guidanceText, setGuidanceText] = useState("");
+  const { isInstallable, install } = usePWAInstall();
 
   const handleBellClick = async () => {
     setIsGuidanceOpen(true);
@@ -92,10 +94,10 @@ export function HomeScreen({
   return (
     <motion.div
       className="min-h-screen pb-28 safe-top"
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 1.05 }}
-      transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -10, scale: 1.02 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
     >
       {/* Ambient glow */}
       <div
@@ -126,6 +128,17 @@ export function HomeScreen({
           </div>
 
           <div className="flex gap-1">
+            {isInstallable && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                onClick={install}
+                title="Install App"
+              >
+                <Download className="w-5 h-5" />
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
@@ -164,31 +177,45 @@ export function HomeScreen({
         {/* Recent Entries */}
         {recentEntries.length > 0 && (
           <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.1,
+                  delayChildren: 0.3,
+                },
+              },
+            }}
           >
             <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-6 px-1">
               Recent Moments
             </h2>
             <div className="columns-2 gap-4 space-y-4">
-              {recentEntries.map((entry, index) => (
+              {recentEntries.map((entry) => (
                 <motion.div
                   key={entry.date}
                   className="break-inside-avoid"
-                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{
-                    delay: 0.1 + index * 0.1,
-                    type: "spring",
-                    stiffness: 260,
-                    damping: 20
+                  variants={{
+                    hidden: { opacity: 0, y: 20, scale: 0.9 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      scale: 1,
+                      transition: {
+                        type: "spring",
+                        stiffness: 260,
+                        damping: 20
+                      }
+                    },
                   }}
                 >
                   <RecentEntryCard
                     entry={entry}
                     onClick={() => onViewEntry(entry.date)}
-                    className={index % 3 === 0 ? "min-h-[160px]" : "min-h-[120px]"}
+                    className="mb-4" // Ensure spacing in columns
                   />
                 </motion.div>
               ))}

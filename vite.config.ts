@@ -66,4 +66,16 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['framer-motion', 'lucide-react', 'sonner', '@radix-ui/react-dialog', '@radix-ui/react-slot'],
+          utils: ['date-fns', 'clsx', 'tailwind-merge'],
+          editor: ['@tiptap/react', '@tiptap/starter-kit'],
+        },
+      },
+    },
+  },
 }));
