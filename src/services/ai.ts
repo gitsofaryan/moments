@@ -326,6 +326,43 @@ Rules:
       return "";
     }
   }
+
+  // Generate weekly guidance (on bell click)
+  async generateWeeklyGuidance(recentEntries: JournalEntry[]): Promise<string> {
+    if (recentEntries.length === 0) {
+      return "Start your journey by writing a few entries, and I'll find some wisdom for you.";
+    }
+
+    const entriesText = recentEntries
+      .slice(0, 7) // Last 7 days
+      .map((entry) => `${entry.date}: ${entry.contentHtml.replace(/<[^>]*>/g, " ").trim().slice(0, 200)}`)
+      .join("\n\n");
+
+    const prompt = `
+You are a supportive, observant friend.
+Task: Read the recent journal entries (past 7 days including today) and write a gentle, 2-3 sentence summary/message to the user.
+
+Style:
+- Start with "In the past few days, you..." or "Lately, you've been..." and mention specific things they did or felt.
+- End with a short encouraging remark (e.g., "It's going great, keep it up!" or "You're doing well.").
+- Be warm and casual.
+
+User's Recent Entries:
+${entriesText}
+`;
+
+    try {
+      const guidance = await puterService.chat(prompt, {
+        model: "gpt-4o",
+        temperature: 0.7,
+        max_tokens: 100,
+      });
+      return guidance.trim();
+    } catch (error) {
+      console.error("Failed to generate guidance:", error);
+      return "Trust the process. Your journey is unfolding exactly as it should.";
+    }
+  }
 }
 
 export const aiService = new AIService();

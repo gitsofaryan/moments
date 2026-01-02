@@ -1,6 +1,7 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Bell, Lock, PenLine, Search, Settings } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Bell, Lock, PenLine, Search, Settings, Sparkles, Loader2, Quote } from 'lucide-react';
 import { JournalEntry, JournalMeta } from '@/types/journal';
 import { formatDisplayDate, getTodayString, formatDate, parseDate, addDays } from '@/lib/dateUtils';
 import { getTimeBasedGreeting } from '@/lib/greetingUtils';
@@ -9,7 +10,16 @@ import { AIThoughtCard } from '@/components/AIThoughtCard';
 import { TodayStatusCard } from '@/components/TodayStatusCard';
 import { RecentEntryCard } from '@/components/RecentEntryCard';
 import { notificationService } from '@/services/notifications';
+import { aiService } from '@/services/ai';
 import { toast } from 'sonner';
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 import { useCurrentTime } from '@/hooks/useCurrentTime';
 
@@ -29,13 +39,36 @@ export function HomeScreen({
   onViewEntry,
 }: HomeScreenProps) {
   const navigate = useNavigate();
+  const [isGuidanceOpen, setIsGuidanceOpen] = useState(false);
+  const [isGeneratingGuidance, setIsGeneratingGuidance] = useState(false);
+  const [guidanceText, setGuidanceText] = useState("");
 
-  const handleEnableNotifications = async () => {
-    const granted = await notificationService.requestPermission();
-    if (granted) {
-      toast.success("You're all set notified!");
+  const handleBellClick = async () => {
+    setIsGuidanceOpen(true);
+    setIsGeneratingGuidance(true);
+    setGuidanceText(""); // Reset
+
+    try {
+      const guidance = await aiService.generateWeeklyGuidance(recentEntries);
+      setGuidanceText(guidance);
+    } catch (error) {
+      setGuidanceText("Trust the journey.");
+    } finally {
+      setIsGeneratingGuidance(false);
     }
   };
+
+  useEffect(() => {
+    const hasShown = sessionStorage.getItem('journey_has_shown_guidance');
+    if (!hasShown && recentEntries.length > 0) {
+      const timer = setTimeout(() => {
+        handleBellClick();
+        sessionStorage.setItem('journey_has_shown_guidance', 'true');
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [recentEntries]);
+
   const now = useCurrentTime(); // updates every minute
   const greeting = getTimeBasedGreeting(now);
   const todayString = formatDate(now);
@@ -60,10 +93,11 @@ export function HomeScreen({
         className="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] pointer-events-none opacity-40"
         style={{
           background: 'radial-gradient(ellipse at center, hsl(35 85% 58% / 0.1), transparent 70%)',
+          zIndex: 0
         }}
       />
 
-      <div className="max-w-lg mx-auto px-5 pt-12">
+      <div className="max-w-lg mx-auto px-5 pt-12 relative z-10">
         {/* Header */}
         <motion.header
           className="mb-8 flex items-start justify-between"
@@ -87,10 +121,10 @@ export function HomeScreen({
               variant="ghost"
               size="icon"
               className="rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-              onClick={handleEnableNotifications}
-              title="Enable Notifications"
+              onClick={handleBellClick}
+              title="Get Guidance"
             >
-              <Bell className="w-5 h-5" />
+              <Sparkles className="w-5 h-5" />
             </Button>
           </div>
         </motion.header>
@@ -153,6 +187,42 @@ export function HomeScreen({
           </motion.section>
         )}
       </div>
+
+      {/* Guidance Dialog */}
+      <Dialog open={isGuidanceOpen} onOpenChange={setIsGuidanceOpen}>
+        <DialogContent className="sm:max-w-md border-primary/20 bg-background/95 backdrop-blur-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-display text-2xl">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <span>Your Guidance</span>
+            </DialogTitle>
+            <DialogDescription>
+              Based on your recent week...
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-6 flex flex-col items-center justify-center min-h-[150px] text-center">
+            {isGeneratingGuidance ? (
+              <div className="flex flex-col items-center gap-4 animate-pulse">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                <p className="text-sm text-muted-foreground font-medium">Listening to your week...</p>
+              </div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="relative px-6"
+              >
+                <Quote className="w-8 h-8 text-primary/10 absolute -top-4 -left-2" />
+                <p className="text-lg sm:text-xl font-display leading-relaxed text-foreground/90 italic">
+                  "{guidanceText}"
+                </p>
+                <Quote className="w-8 h-8 text-primary/10 absolute -bottom-4 -right-2 rotate-180" />
+              </motion.div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

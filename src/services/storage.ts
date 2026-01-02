@@ -140,6 +140,29 @@ class StorageService {
     localStorage.setItem(this.STORAGE_KEYS.LAST_SYNC, now.toString());
     console.log("Completed sync of past entries");
   }
+
+  async getEntryFromPuter(dateStr: string): Promise<JournalEntry | null> {
+    try {
+      const date = new Date(dateStr);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const path = `journey/entries/${year}/${month}/${dateStr}.json`;
+
+      const exists = await puterService.readFile(path);
+      if (exists) {
+        // Evaluate it just in case it's returned as string
+        const entry = typeof exists === 'string' ? JSON.parse(exists) : exists;
+        
+        // Restore to local storage so we don't have to fetch again
+        await this.saveEntry(entry);
+        return entry;
+      }
+      return null;
+    } catch (error) {
+      console.log(`No entry found on Puter for ${dateStr}`);
+      return null;
+    }
+  }
 }
 
 export const storageService = new StorageService();

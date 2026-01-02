@@ -9,6 +9,8 @@ import { usePuterAuth } from '@/hooks/usePuterAuth';
 import { getTodayString, parseDate, formatDate, addDays } from '@/lib/dateUtils';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { storageService } from '@/services/storage';
+import { toast } from 'sonner';
 
 const Index = () => {
   const [currentRoute, setCurrentRoute] = useState<Route>('home');
@@ -23,6 +25,7 @@ const Index = () => {
     createOrUpdateEntry,
     getDayStatus,
     getAllDayStatuses,
+    refresh,
   } = useJournal();
 
   const todayEntry = getEntry(getTodayString());
@@ -56,10 +59,26 @@ const Index = () => {
     setCurrentRoute(route);
   }, []);
 
-  const handleDayClick = useCallback((date: string) => {
+  const handleDayClick = useCallback(async (date: string) => {
+    // If entry doesn't exist locally, try fetching from Puter
+    if (!entries[date]) {
+      const toastId = toast.loading("Checking cloud archive...");
+      try {
+        const archivedEntry = await storageService.getEntryFromPuter(date);
+        if (archivedEntry) {
+          await refresh(); // Reload to get the new entry into state
+          toast.success("Entry restored from cloud!", { id: toastId });
+        } else {
+          toast.dismiss(toastId);
+        }
+      } catch (e) {
+        toast.dismiss(toastId);
+      }
+    }
+
     setSelectedDate(date);
     setCurrentRoute('write');
-  }, []);
+  }, [entries, refresh]);
 
   const handleSave = useCallback(
     (date: string, title: string, content: string) => {

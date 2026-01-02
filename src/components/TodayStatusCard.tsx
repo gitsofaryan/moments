@@ -59,6 +59,11 @@ export function TodayStatusCard({ entry, onWriteClick }: TodayStatusCardProps) {
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             <span className="text-xs font-medium text-primary uppercase tracking-wider">{displayDate}</span>
+            {entry && entry.updatedAt && (
+              <span className="text-xs text-muted-foreground/60">
+                • {new Date(entry.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            )}
             {!isLocked && timeRemaining > 0 && timeRemaining < 14400000 && (
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="w-3 h-3" />

@@ -111,6 +111,11 @@ export function useJournal() {
       return null;
     }
 
+    // Check if content actually changed to avoid spurious timestamp updates
+    if (existing && existing.title === title && existing.contentHtml === contentHtml) {
+      return existing;
+    }
+
     const now = Date.now();
     const entry: JournalEntry = {
       date,

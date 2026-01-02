@@ -27,9 +27,8 @@ export function JournalEditor({
   className = ''
 }: JournalEditorProps) {
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const isProgrammaticChange = useRef(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
-
-
 
   // ... imports
 
@@ -76,6 +75,12 @@ export function JournalEditor({
       }
     },
     onUpdate: ({ editor }) => {
+      // If this update was triggered by us setting the content programmatically, ignore it
+      if (isProgrammaticChange.current) {
+        isProgrammaticChange.current = false;
+        return;
+      }
+
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
@@ -89,7 +94,10 @@ export function JournalEditor({
   // Update editor content when content prop changes
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
+      isProgrammaticChange.current = true;
       editor.commands.setContent(content);
+      // Safety reset in case event didn't fire (unlikely but safe)
+      setTimeout(() => { isProgrammaticChange.current = false; }, 0);
     }
   }, [content, editor]);
 
