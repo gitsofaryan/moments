@@ -4,13 +4,73 @@ import { isToday, isDateInFuture } from "@/lib/dateUtils";
 
 // Local Storage Service
 class StorageService {
-  private readonly STORAGE_KEYS = {
+  private currentUserId: string | null = null;
+  
+  private readonly BASE_STORAGE_KEYS = {
     ENTRIES: "journey_entries",
     META: "journey_meta",
     AI_THOUGHTS: "journey_ai_thoughts",
     WEEKLY_SUMMARIES: "journey_weekly_summaries",
     LAST_SYNC: "journey_last_sync"
   };
+
+  setUserId(userId: string | null) {
+    console.log("Setting user ID:", userId);
+    this.currentUserId = userId;
+    
+    // If we have a user ID, we might need to migrate "guest" data if this is their first time
+    if (userId) {
+      this.migrateGuestData(userId);
+    }
+  }
+
+  private get STORAGE_KEYS() {
+    const suffix = this.currentUserId ? `_${this.currentUserId}` : '';
+    return {
+      ENTRIES: `${this.BASE_STORAGE_KEYS.ENTRIES}${suffix}`,
+      META: `${this.BASE_STORAGE_KEYS.META}${suffix}`,
+      AI_THOUGHTS: `${this.BASE_STORAGE_KEYS.AI_THOUGHTS}${suffix}`,
+      WEEKLY_SUMMARIES: `${this.BASE_STORAGE_KEYS.WEEKLY_SUMMARIES}${suffix}`,
+      LAST_SYNC: `${this.BASE_STORAGE_KEYS.LAST_SYNC}${suffix}`
+    };
+  }
+  
+  private migrateGuestData(userId: string) {
+    // Check if user has any existing data
+    const userKeys = {
+      ENTRIES: `${this.BASE_STORAGE_KEYS.ENTRIES}_${userId}`,
+      META: `${this.BASE_STORAGE_KEYS.META}_${userId}`
+    };
+    
+    const hasUserData = localStorage.getItem(userKeys.ENTRIES) || localStorage.getItem(userKeys.META);
+    
+    if (!hasUserData) {
+        console.log("New user detected. Checking for guest data to migrate...");
+        // Check for guest data
+        const guestEntries = localStorage.getItem(this.BASE_STORAGE_KEYS.ENTRIES);
+        
+        if (guestEntries) {
+            console.log("Migrating guest data to user", userId);
+            try {
+                // Copy all guest data to user keys
+                Object.keys(this.BASE_STORAGE_KEYS).forEach(key => {
+                    const guestKey = this.BASE_STORAGE_KEYS[key as keyof typeof this.BASE_STORAGE_KEYS];
+                    const userKey = `${guestKey}_${userId}`;
+                    const data = localStorage.getItem(guestKey);
+                    
+                    if (data) {
+                        localStorage.setItem(userKey, data);
+                        // Optional: Clear guest data after migration to ensure privacy for next user
+                        localStorage.removeItem(guestKey);
+                    }
+                });
+                console.log("Migration complete.");
+            } catch (e) {
+                console.error("Migration failed", e);
+            }
+        }
+    }
+  }
 
   // Helper to safe parse JSON
   private getFromStorage<T>(key: string): T | null {

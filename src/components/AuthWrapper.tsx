@@ -59,7 +59,7 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
             <div className="min-h-[100dvh] flex items-center justify-center bg-background p-4">
                 <div className="glass-card max-w-md w-full p-8 space-y-6 rounded-3xl">
                     <div className="text-center space-y-2">
-                        <h1 className="text-2xl font-display font-bold">Welcome Back</h1>
+                        <h1 className="text-2xl font-display font-bold">Welcome to Moments</h1>
                         <p className="text-muted-foreground">
                             Sign in with Puter to enable AI features and sync your journey.
                         </p>

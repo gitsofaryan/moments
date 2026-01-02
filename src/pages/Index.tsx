@@ -130,7 +130,7 @@ const Index = () => {
             <span className="text-4xl">📖</span>
           </motion.div>
           <h1 className="font-display text-4xl font-semibold text-foreground mb-4">
-            Journey
+            Moments
           </h1>
           <p className="text-muted-foreground mb-8 leading-relaxed">
             Capture your 365-day journey. Sign in with Puter to begin.
@@ -143,7 +143,7 @@ const Index = () => {
             Sign in to Start
           </Button>
         </motion.div>
-      </div>
+      </div >
     );
   }
 

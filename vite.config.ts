@@ -20,8 +20,8 @@ export default defineConfig(({ mode }) => ({
         enabled: true
       },
       manifest: {
-        name: 'The Journey',
-        short_name: 'Journey',
+        name: 'Moments',
+        short_name: 'Moments',
         description: 'A premium digital journal to capture your year.',
         theme_color: '#09090b',
         background_color: '#09090b',

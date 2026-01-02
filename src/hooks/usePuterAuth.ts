@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { puterService } from "@/services/puter";
 
+import { storageService } from "@/services/storage";
+
 export function usePuterAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,13 +37,16 @@ export function usePuterAuth() {
       if (isSignedIn) {
         const userData = await puterService.getUser();
         setUser(userData);
+        storageService.setUserId(userData.id); // Set User ID for isolated storage
         setIsAuthenticated(true);
       } else {
         setIsAuthenticated(false);
+        storageService.setUserId(null); // Ensure guest mode
       }
     } catch (error) {
       console.error("Auth check failed:", error);
       setIsAuthenticated(false);
+      storageService.setUserId(null);
     } finally {
       setIsLoading(false);
     }
@@ -54,6 +59,7 @@ export function usePuterAuth() {
       if (result) {
         const userData = await puterService.getUser();
         setUser(userData);
+        storageService.setUserId(userData.id); // Set User ID for isolated storage
         setIsAuthenticated(true);
       }
     } catch (error) {
@@ -69,6 +75,7 @@ export function usePuterAuth() {
     try {
       await puterService.signOut();
       setUser(null);
+      storageService.setUserId(null); // Clear User ID
       setIsAuthenticated(false);
     } catch (error) {
       console.error("Sign out failed:", error);
