@@ -3,12 +3,6 @@
 
 **Moments** is your private daily journal that works completely offline.  Reflect on your day, capture your thoughts, and get thoughtful insights—all while keeping your words safe on your device, never shared with anyone. 
 
-<p align="center">
-  <img src="/public/icon. svg" alt="Moments App Icon" width="100">
-</p>
-
----
-
 ## 🌟 Why Moments? 
 
 Journaling shouldn't feel complicated. Moments makes it simple. 
