@@ -123,7 +123,7 @@ export function HomeScreen({
             <p className="text-muted-foreground text-sm font-medium flex items-center gap-2">
               {displayDate}
               <span className="w-1 h-1 rounded-full bg-primary/40" />
-              Day {dayIndex}
+              {displayTime}
             </p>
           </div>
 
