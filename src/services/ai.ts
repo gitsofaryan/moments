@@ -327,40 +327,70 @@ Rules:
     }
   }
 
-  // Generate weekly guidance (on bell click)
-  async generateWeeklyGuidance(recentEntries: JournalEntry[]): Promise<string> {
-    if (recentEntries.length === 0) {
-      return "Start your journey by writing a few entries, and I'll find some wisdom for you.";
+  // Generate AI Wrap (Observe, Analyze, Guide, Cheer)
+  async generateWrap(entries: JournalEntry[]): Promise<string> {
+    if (entries.length === 0) {
+      return "Start your journey by writing a few entries, and I'll create a personal wrap for you.";
     }
 
-    const entriesText = recentEntries
-      .slice(0, 7) // Last 7 days
-      .map((entry) => `${entry.date}: ${entry.contentHtml.replace(/<[^>]*>/g, " ").trim().slice(0, 200)}`)
+    const entriesText = entries
+      .map((entry) => `[${entry.date}]: ${entry.contentHtml.replace(/<[^>]*>/g, " ").trim().slice(0, 300)}`)
       .join("\n\n");
 
     const prompt = `
-You are a supportive, observant friend.
-Task: Read the recent journal entries (past 7 days including today) and write a gentle, 2-3 sentence summary/message to the user.
+You are a deeply observant and supportive AI companion.
+Task: Analyze the user's journal entries (including today's) and generate a "Personal Wrap".
+
+Data:
+${entriesText}
+
+Instructions:
+1. **Observe**: Start by noticing what happened. "I see that you..."
+2. **Analyze**: Offer a brief insight on patterns or feelings. "It seems like..."
+3. **Guide**: meaningful, gentle guidance or perspective.
+4. **Cheer**: End with genuine encouragement or celebration.
 
 Style:
-- Start with "In the past few days, you..." or "Lately, you've been..." and mention specific things they did or felt.
-- End with a short encouraging remark (e.g., "It's going great, keep it up!" or "You're doing well.").
-- Be warm and casual.
-
-User's Recent Entries:
-${entriesText}
+- Write ONE cohesive paragraph (approx 3-4 sentences).
+- specific to the content provided.
+- Warm, personal, and uplifting.
 `;
 
     try {
       const guidance = await puterService.chat(prompt, {
         model: "gpt-4o",
         temperature: 0.7,
-        max_tokens: 100,
+        max_tokens: 150,
       });
       return guidance.trim();
     } catch (error) {
-      console.error("Failed to generate guidance:", error);
-      return "Trust the process. Your journey is unfolding exactly as it should.";
+      console.error("Failed to generate wrap:", error);
+      return "Your journey is unique. Keep capturing these moments.";
+    }
+  }
+  // Generate short observation for Share Card
+  async generateShareObservation(content: string): Promise<string> {
+    const text = content.replace(/<[^>]*>/g, " ").trim().slice(0, 1000);
+    const prompt = `
+You are a thoughtful observer.
+Task: Write a SINGLE, profound, short sentence observing the essence of this journal entry.
+Input: "${text}"
+
+Style:
+- Poetic, philosophical, or warm.
+- Max 15 words.
+- No quotes in output.
+`;
+
+    try {
+      const observation = await puterService.chat(prompt, {
+        model: "grok-4-fast",
+        temperature: 0.7,
+        max_tokens: 30,
+      });
+      return observation.trim().replace(/['"]/g, "");
+    } catch (error) {
+      return "A moment captured in time.";
     }
   }
 }

@@ -147,14 +147,24 @@ export function useJournal() {
   }, [entries, meta]);
 
   const getAllDayStatuses = useCallback((): DayStatus[] => {
-    if (!meta) return [];
+    // strict 365 days for Current Year (2026 based on context)
+    // or dynamic based on current date. valid for "My Year".
+    const currentYear = new Date().getFullYear(); 
+    // HARDCODED FIX: User context implies "2026" based on previous logs, 
+    // but usually we want current year. Let's stick to system time or meta if available.
+    // If no meta, default to current year.
+    const year = meta ? parseDate(meta.startDate).getFullYear() : new Date().getFullYear(); // Fallback
     
     const statuses: DayStatus[] = [];
-    const startDate = parseDate(meta.startDate);
+    const startDate = new Date(year, 0, 1); // Jan 1st
     
-    for (let i = 0; i < 365; i++) {
-      const date = formatDate(addDays(startDate, i));
-      statuses.push(getDayStatus(date));
+    // Determine if leap year to be safe, but loop until next year
+    let currentDate = new Date(startDate);
+    
+    while (currentDate.getFullYear() === year) {
+        const dateStr = formatDate(currentDate);
+        statuses.push(getDayStatus(dateStr));
+        currentDate = addDays(currentDate, 1);
     }
     
     return statuses;
@@ -168,7 +178,8 @@ export function useJournal() {
     createOrUpdateEntry,
     getDayStatus,
     getAllDayStatuses,
-    saveEntry
+    saveEntry,
+    refresh: loadJournalData
   };
 }
 

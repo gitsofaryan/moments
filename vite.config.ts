@@ -20,22 +20,42 @@ export default defineConfig(({ mode }) => ({
         enabled: true
       },
       manifest: {
-        name: 'Moments',
-        short_name: 'Moments',
+        name: 'The Journey',
+        short_name: 'Journey',
         description: 'A premium digital journal to capture your year.',
         theme_color: '#09090b',
         background_color: '#09090b',
         display: 'standalone',
+        orientation: 'portrait',
+        start_url: '/',
         icons: [
           {
-            src: 'icon.svg',
-            sizes: 'any',
-            type: 'image/svg+xml'
+            src: 'pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any maskable'
           },
           {
-            src: 'icon.svg',
+            src: 'pwa-512x512.png',
             sizes: '512x512',
-            type: 'image/svg+xml'
+            type: 'image/png',
+            purpose: 'any maskable'
+          }
+        ],
+        screenshots: [
+          {
+            src: "screenshot-desktop.png",
+            sizes: "1280x800",
+            type: "image/png",
+            form_factor: "wide",
+            label: "Desktop View"
+          },
+          {
+            src: "screenshot-mobile.png",
+            sizes: "390x844",
+            type: "image/png",
+            form_factor: "narrow",
+            label: "Mobile View"
           }
         ]
       }

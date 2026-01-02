@@ -9,30 +9,44 @@ interface YearGridProps {
 }
 
 export function YearGrid({ days, onDayClick }: YearGridProps) {
-  // Group days by month
+  // Group days by month with proper padding for alignment
   const monthGroups = useMemo(() => {
-    const groups: { month: string; days: DayStatus[] }[] = [];
+    const groups: { month: string; days: (DayStatus | null)[] }[] = [];
     let currentMonth = '';
-    let currentGroup: DayStatus[] = [];
+    let currentDays: DayStatus[] = [];
 
-    days.forEach((day) => {
+    // Helper to push a group
+    const pushGroup = (month: string, dayStatuses: DayStatus[]) => {
+      if (dayStatuses.length === 0) return;
+
+      // Calculate start padding
+      const firstDayDate = parseDate(dayStatuses[0].date);
+      const startDayIndex = firstDayDate.getDay(); // 0 = Sunday, 1 = Monday...
+
+      // Create array with nulls for padding
+      const paddedDays: (DayStatus | null)[] = Array(startDayIndex).fill(null).concat(dayStatuses);
+      groups.push({ month, days: paddedDays });
+    };
+
+    days.forEach((day, index) => {
       const date = parseDate(day.date);
       const monthName = getMonthName(date.getMonth());
 
       if (monthName !== currentMonth) {
-        if (currentGroup.length > 0) {
-          groups.push({ month: currentMonth, days: currentGroup });
+        if (currentDays.length > 0) {
+          pushGroup(currentMonth, currentDays);
         }
         currentMonth = monthName;
-        currentGroup = [day];
+        currentDays = [day];
       } else {
-        currentGroup.push(day);
+        currentDays.push(day);
+      }
+
+      // Push last group
+      if (index === days.length - 1) {
+        pushGroup(currentMonth, currentDays);
       }
     });
-
-    if (currentGroup.length > 0) {
-      groups.push({ month: currentMonth, days: currentGroup });
-    }
 
     return groups;
   }, [days]);
@@ -55,40 +69,29 @@ export function YearGrid({ days, onDayClick }: YearGridProps) {
           <h3 className="font-display text-2xl font-medium text-foreground mb-4 pl-1 flex items-center justify-between">
             <span>{group.month}</span>
             <span className="text-xs font-sans text-muted-foreground bg-primary/10 px-2 py-1 rounded-full">
-              {group.days.filter(d => d.hasEntry).length} moments
+              {group.days.filter(d => d && d.hasEntry).length} moments
             </span>
           </h3>
 
           <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+            {/* Weekday Headers */}
             {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
               <div key={i} className="text-[10px] text-center text-muted-foreground/50 font-medium mb-1">
                 {d}
               </div>
             ))}
 
-            {/* Pad the start of the month if needed - simplistic approach or just grid it */}
-            {/* The existing logic just lists days. To make it a TRUE calendar grid, we need offset days.
-                However, the previous code just mapped 'days'. If day.dayIndex is continuous, it might not align to Weekdays.
-                Since 'days' in props comes from getAllDayStatuses(), it's likely 1-365.
-                To make it look like a calendar, we need to respect week alignment. 
-                But let's stick to the "Bubble Grid" visual for now which is more abstract and "Journal-y" 
-                rather than a strict calendar. Adding Weekday headers might be confusing if days don't align.
-                
-                WAIT: The user said "add dates". If I add "S M T W..." headers, I MUST align days.
-                The current `days` list is just a flat array. I should stick to the visual grid of bubbles (abstract) 
-                OR align them. Abstract is safer/easier unless I rewrite the day generation logic.
-                
-                Let's stick to the abstract grid (just circles) but nice styling. 
-                I will REMOVE the weekday headers I just typed above to avoid misalignment.
-            */}
-
             {group.days.map((day, dayIndex) => (
-              <YearDot
-                key={day.date}
-                day={day}
-                onClick={() => onDayClick(day.date)}
-                delay={groupIndex * 0.03 + dayIndex * 0.008}
-              />
+              day ? (
+                <YearDot
+                  key={day.date}
+                  day={day}
+                  onClick={() => onDayClick(day.date)}
+                  delay={groupIndex * 0.03 + dayIndex * 0.008}
+                />
+              ) : (
+                <div key={`empty-${dayIndex}`} />
+              )
             ))}
           </div>
         </motion.div>

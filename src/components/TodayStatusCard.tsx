@@ -64,12 +64,7 @@ export function TodayStatusCard({ entry, onWriteClick }: TodayStatusCardProps) {
                 • {new Date(entry.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             )}
-            {!isLocked && timeRemaining > 0 && timeRemaining < 14400000 && (
-              <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock className="w-3 h-3" />
-                {formatTimeRemaining(timeRemaining)}
-              </span>
-            )}
+            {/* Countdown removed per user request */}
           </div>
 
           {entry.title && (

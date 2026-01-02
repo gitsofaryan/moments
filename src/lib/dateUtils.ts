@@ -35,11 +35,16 @@ export function formatFullDate(dateString: string): string {
 }
 
 export function getDayIndex(startDate: string, currentDate: string): number {
-  const start = parseDate(startDate);
+  // Ignore startDate, calculate absolute day of year for currentDate
   const current = parseDate(currentDate);
+  const start = new Date(current.getFullYear(), 0, 1); // Jan 1st
   const diffTime = current.getTime() - start.getTime();
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  return Math.max(1, diffDays + 1);
+  return diffDays + 1;
+}
+
+export function getStartOfYear(year: number = new Date().getFullYear()): Date {
+  return new Date(year, 0, 1);
 }
 
 export function isEntryLocked(createdAt: number): boolean {

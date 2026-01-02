@@ -48,8 +48,17 @@ export function HomeScreen({
     setIsGeneratingGuidance(true);
     setGuidanceText(""); // Reset
 
+    // Prepare context: Recent entries + Today (if exists)
+    const contextEntries = [...recentEntries];
+    if (todayEntry && (todayEntry.title || todayEntry.contentHtml)) {
+      // Filter if today is already in recent to avoid dupe, otherwise add
+      if (!contextEntries.find(e => e.date === todayEntry.date)) {
+        contextEntries.unshift(todayEntry);
+      }
+    }
+
     try {
-      const guidance = await aiService.generateWeeklyGuidance(recentEntries);
+      const guidance = await aiService.generateWrap(contextEntries);
       setGuidanceText(guidance);
     } catch (error) {
       setGuidanceText("Trust the journey.");

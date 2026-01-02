@@ -1,9 +1,10 @@
 import { useState, useCallback, useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { Navigation, Route } from '@/components/Navigation';
+import { Navigation } from '@/components/Navigation';
 import { HomeScreen } from '@/components/HomeScreen';
 import { WriteScreen } from '@/components/WriteScreen';
 import { CalendarScreen } from '@/components/CalendarScreen';
+
 import { useJournal } from '@/hooks/useJournal';
 import { usePuterAuth } from '@/hooks/usePuterAuth';
 import { getTodayString, parseDate, formatDate, addDays } from '@/lib/dateUtils';
@@ -11,6 +12,9 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { storageService } from '@/services/storage';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
+
+type Route = 'home' | 'write' | 'calendar';
 
 const Index = () => {
   const [currentRoute, setCurrentRoute] = useState<Route>('home');
@@ -42,6 +46,7 @@ const Index = () => {
 
     // Go back up to 14 days to find 5 entries
     for (let i = 1; i <= 14 && result.length < 5; i++) {
+      // ... (existing logic)
       const date = formatDate(addDays(new Date(), -i));
       const entry = entries[date];
       if (entry && (entry.title.trim() || entry.contentHtml.replace(/<[^>]*>/g, '').trim())) {
@@ -169,7 +174,7 @@ const Index = () => {
 
         {currentRoute === 'write' && (
           <WriteScreen
-            key={`write-${selectedDate}`}
+            key={`write - ${selectedDate} `}
             date={selectedDate}
             dayIndex={dayStatus.dayIndex}
             entry={currentEntry}
