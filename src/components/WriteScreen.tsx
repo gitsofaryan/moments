@@ -91,6 +91,7 @@ export function WriteScreen({
               onChange={handleTitleChange}
               isLocked={isLocked}
               placeholder="Title..."
+              content={content}
             />
 
             {/* Metadata Line: Date | Char Count */}
@@ -98,6 +99,14 @@ export function WriteScreen({
               <span>{formatDateMeta(date)}</span>
               <span className="w-1 h-1 rounded-full bg-border" />
               <span>{charCount} characters</span>
+              {entry && entry.updatedAt && (
+                <>
+                  <span className="w-1 h-1 rounded-full bg-border" />
+                  <span>
+                    Updated {new Date(entry.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </>
+              )}
             </div>
 
             <JournalEditor

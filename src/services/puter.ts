@@ -61,7 +61,8 @@ class PuterService {
 
   // File System Operations (require auth)
   async readFile(path: string): Promise<any> {
-    await this.ensureAuth();
+    const auth = await this.ensureAuth();
+    if (!auth) throw new Error("Not authenticated");
     try {
       const content = await window.puter.fs.read(path);
       // Handle both string and blob responses
@@ -80,12 +81,15 @@ class PuterService {
   }
 
   async writeFile(path: string, data: any): Promise<void> {
-    await this.ensureAuth();
+    const auth = await this.ensureAuth();
+    if (!auth) throw new Error("Not authenticated");
     try {
       // Ensure parent directory exists
       const pathParts = path.split("/").filter(Boolean);
       if (pathParts.length > 1) {
-        const dirPath = "/" + pathParts.slice(0, -1).join("/");
+        // Reconstruct directory path preserving relative/absolute nature
+        const isAbsolute = path.startsWith('/');
+        const dirPath = (isAbsolute ? '/' : '') + pathParts.slice(0, -1).join("/");
         await this.ensureDirectory(dirPath);
       }
       await window.puter.fs.write(path, JSON.stringify(data, null, 2));
@@ -104,12 +108,14 @@ class PuterService {
         await window.puter.fs.mkdir(path, { recursive: true });
       } catch (error) {
         console.error("Create directory failed:", error);
+        throw error;
       }
     }
   }
 
   async deleteFile(path: string): Promise<void> {
-    await this.ensureAuth();
+    const auth = await this.ensureAuth();
+    if (!auth) throw new Error("Not authenticated");
     try {
       await window.puter.fs.delete(path);
     } catch (error) {
@@ -118,7 +124,8 @@ class PuterService {
   }
 
   async listFiles(path: string): Promise<string[]> {
-    await this.ensureAuth();
+    const auth = await this.ensureAuth();
+    if (!auth) return [];
     try {
       const files = await window.puter.fs.readdir(path);
       return files.map((f: any) => f.name);

@@ -28,9 +28,16 @@ export function RecentEntryCard({ entry, onClick, className = "" }: RecentEntryC
     >
       {/* Header: Date + Lock */}
       <div className="w-full flex justify-between items-start mb-3">
-        <span className="text-xs font-sans font-medium text-primary uppercase tracking-wider opacity-90">
-          {displayDate}
-        </span>
+        <div className="flex flex-col">
+          <span className="text-xs font-sans font-medium text-primary uppercase tracking-wider opacity-90">
+            {displayDate}
+          </span>
+          {entry.updatedAt && (
+            <span className="text-[10px] text-white/40 font-mono mt-0.5">
+              {new Date(entry.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )}
+        </div>
         {isLocked && (
           <Lock className="w-3.5 h-3.5 text-white/30" />
         )}

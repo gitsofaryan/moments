@@ -11,8 +11,7 @@ import {
   isToday as checkIsToday
 } from '@/lib/dateUtils';
 
-const STORAGE_KEY = 'journey_entries';
-const META_KEY = 'journey_meta';
+import { storageService } from '@/services/storage';
 
 export function useJournal() {
   const [entries, setEntries] = useState<Record<string, JournalEntry>>({});
@@ -22,18 +21,19 @@ export function useJournal() {
   // Initialize journey
   useEffect(() => {
     loadJournalData();
+    // Background sync of past entries to Puter
+    storageService.syncPastEntries().catch(console.error);
   }, []);
 
-  const loadJournalData = useCallback(() => {
+  const loadJournalData = useCallback(async () => {
     try {
-      const storedEntries = localStorage.getItem(STORAGE_KEY);
-      const storedMeta = localStorage.getItem(META_KEY);
+      const storedEntries = await storageService.getAllEntries();
+      const storedMeta = await storageService.getMeta();
 
       if (storedEntries) {
-        const parsed = JSON.parse(storedEntries);
         // Update lock status for all entries
         const updated: Record<string, JournalEntry> = {};
-        Object.entries(parsed).forEach(([date, entry]) => {
+        Object.entries(storedEntries).forEach(([date, entry]) => {
           const e = entry as JournalEntry;
           updated[date] = {
             ...e,
@@ -44,7 +44,7 @@ export function useJournal() {
       }
 
       if (storedMeta) {
-        setMeta(JSON.parse(storedMeta));
+        setMeta(storedMeta);
       } else {
         // Initialize new journey
         const newMeta: JournalMeta = {
@@ -53,7 +53,7 @@ export function useJournal() {
           entriesCount: 0
         };
         setMeta(newMeta);
-        localStorage.setItem(META_KEY, JSON.stringify(newMeta));
+        await storageService.saveMeta(newMeta);
       }
     } catch (error) {
       console.error('Failed to load journal data:', error);
@@ -62,40 +62,35 @@ export function useJournal() {
     }
   }, []);
 
-  const saveEntry = useCallback((entry: JournalEntry) => {
+  const saveEntry = useCallback(async (entry: JournalEntry) => {
     setEntries(prev => {
       const updated = { ...prev, [entry.date]: entry };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       return updated;
     });
+    
+    // Persist to storage
+    await storageService.saveEntry(entry);
 
     // Update meta
-    setMeta(prev => {
-      if (!prev) return prev;
-      const updated = {
-        ...prev,
+    if (meta) {
+      const updatedMeta = {
+        ...meta,
         entriesCount: Object.keys(entries).length + (entries[entry.date] ? 0 : 1)
       };
-      localStorage.setItem(META_KEY, JSON.stringify(updated));
-      return updated;
-    });
+      setMeta(updatedMeta);
+      await storageService.saveMeta(updatedMeta);
+    }
 
     // Background AI Trigger (Fire and forget)
-    // We import aiService dynamically or use the global one to avoid circular deps if needed
-    // But since this is a hook, we can just call the service method
     import('@/services/ai').then(({ aiService }) => {
-      // Small delay to let UI settle
       setTimeout(() => {
-        // Collect recent entries for context
         const recentEntries = Object.values(entries)
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
           .slice(0, 5);
-        
-        // Force refresh today's thought if we just saved today's entry
         aiService.regenerateTodayThought(entry.date, recentEntries).catch(console.error);
       }, 2000);
     });
-  }, [entries]);
+  }, [entries, meta]);
 
   const getEntry = useCallback((date: string): JournalEntry | null => {
     const entry = entries[date];

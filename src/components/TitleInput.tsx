@@ -1,20 +1,26 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { Sparkles, Loader2 } from 'lucide-react';
+import { aiService } from '@/services/ai';
+import { toast } from 'sonner';
 
 interface TitleInputProps {
   value: string;
   onChange: (value: string) => void;
   isLocked?: boolean;
   placeholder?: string;
+  content?: string; // Content needed for AI generation
 }
 
 export function TitleInput({
   value,
   onChange,
   isLocked = false,
-  placeholder = "Today's title..."
+  placeholder = "Today's title...",
+  content = ""
 }: TitleInputProps) {
   const [localValue, setLocalValue] = useState(value);
+  const [isGenerating, setIsGenerating] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
 
@@ -34,6 +40,28 @@ export function TitleInput({
     }, 500);
   };
 
+  const handleGenerateTitle = async () => {
+    if (!content || content.length < 10) {
+      toast.info("Write a bit more content first!");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const title = await aiService.generateTitle(content);
+      if (title) {
+        handleChange(title);
+        toast.success("Title generated!");
+      } else {
+        toast.error("Could not generate title.");
+      }
+    } catch {
+      toast.error("AI error.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   useEffect(() => {
     return () => {
       if (saveTimeoutRef.current) {
@@ -47,6 +75,7 @@ export function TitleInput({
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.1 }}
+      className="relative group"
     >
       <input
         ref={inputRef}
@@ -59,10 +88,27 @@ export function TitleInput({
           w-full bg-transparent border-none outline-none
           font-display text-4xl sm:text-5xl font-bold tracking-tight
           text-foreground placeholder:text-muted-foreground/30
-          transition-opacity duration-300
+          transition-opacity duration-300 pr-12
           ${isLocked ? 'opacity-70 cursor-not-allowed' : ''}
         `}
       />
+
+      {!isLocked && (
+        <motion.button
+          onClick={handleGenerateTitle}
+          disabled={isGenerating}
+          className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-muted-foreground hover:text-purple-400 opacity-0 group-hover:opacity-100 transition-all rounded-full hover:bg-purple-500/10"
+          title="Auto-generate title"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          {isGenerating ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <Sparkles className="w-5 h-5" />
+          )}
+        </motion.button>
+      )}
     </motion.div>
   );
 }

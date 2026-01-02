@@ -297,6 +297,35 @@ Rules:
       return text; // Return original on fail
     }
   }
+  // Generate one-word title
+  async generateTitle(content: string): Promise<string> {
+    const text = content.replace(/<[^>]*>/g, " ").trim();
+    if (!text) return "";
+
+    const prompt = `
+You are a poetic AI.
+Task: Generate a SINGLE, ONE-WORD title for this journal entry.
+Input: "${text.slice(0, 500)}"
+
+Rules:
+- Output ONLY the word.
+- No quotes, no markdown.
+- The word should be evocative, abstract, or emotional (e.g., "Epiphany", "Drifting", "Spark", "Shadows").
+- AVOID generic words like "Journal", "Day", "Diary", "Entry".
+`;
+
+    try {
+      const title = await puterService.chat(prompt, {
+        model: "grok-4-fast",
+        temperature: 0.7,
+        max_tokens: 10,
+      });
+      return title.trim().replace(/['"]/g, "");
+    } catch (error) {
+      console.error("Failed to generate title:", error);
+      return "";
+    }
+  }
 }
 
 export const aiService = new AIService();
